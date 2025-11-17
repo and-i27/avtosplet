@@ -11,6 +11,12 @@ const session = await auth();
             <Link href="/">
              <span className="text-black">Home</span>
             </Link>
+            <Link href={"/login/"}>
+                        <span>cred</span>
+                    </Link>
+            <Link href={"/register/"}>
+                        <span>reg</span>
+                    </Link>
 
             <div className="flex items-center gap-5 text-black">
                 {session && session?.user ? (

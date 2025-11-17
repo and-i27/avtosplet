@@ -1,0 +1,55 @@
+import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { writeClient } from "@/sanity/lib/write-client";
+
+export async function POST(req: NextRequest) {
+  try {
+    const { name, email, password } = await req.json();
+
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 }
+      );
+    }
+
+    // Preveri ali uporabnik že obstaja
+    const existingUser = await writeClient.fetch(
+      `*[_type == "user" && email == $email][0]`,
+      { email }
+    );
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 400 }
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Ustvari uporabnika v Sanity
+    const newUser = await writeClient.create({
+      _type: "user",
+      name,
+      email,
+      password: hashedPassword,
+    });
+console.log("Incoming data:", { name, email, password });
+
+    return NextResponse.json(
+      { message: "User created successfully", userId: newUser._id },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error(error);
+    console.error("Register error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+      
+    );
+  }
+}
+
