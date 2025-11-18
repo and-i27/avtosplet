@@ -6,44 +6,70 @@ import { signIn } from "next-auth/react";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     const res = await signIn("credentials", {
-      redirect: false,
       email,
       password,
+      redirect: false,
     });
 
-    if (!res?.error) {
-      window.location.href = "/";
-    } else {
-      alert("Invalid credentials");
-    }
+    setLoading(false);
+
+    if (!res?.error) window.location.href = "/";
+    else alert("Invalid email or password");
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
 
-      <br />
+        <h2 className="text-2xl font-semibold text-center mb-6">Log In</h2>
 
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <form onSubmit={handleLogin} className="space-y-3">
+          <input
+            type="email"
+            className="w-full p-2 border rounded"
+            placeholder="Email"
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-      <br />
+          <input
+            type="password"
+            className="w-full p-2 border rounded"
+            placeholder="Password"
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-      <button type="submit">Log in</button>
-    </form>
+          <button
+            type="submit"
+            className="w-full p-2 bg-blue-600 text-white rounded"
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : "Log In"}
+          </button>
+        </form>
+
+        {/* GitHub login */}
+        <button
+          onClick={() => signIn("github")}
+          className="w-full mt-4 p-2 bg-black text-white rounded"
+        >
+      Login with GitHub
+    </button>
+    <p className="text-center text-sm mt-3">
+  Don’t have an account?{" "}
+  <a href="/login/register" className="text-blue-600 underline">
+    Register
+  </a>
+</p>
+      </div>
+    </div>
   );
 }

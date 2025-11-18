@@ -1,4 +1,4 @@
-import { auth, signOut, signIn } from "@/auth";
+import { auth, signOut, } from "@/auth";
 import Link from "next/link";
 import React from 'react';
 
@@ -11,12 +11,6 @@ const session = await auth();
             <Link href="/">
              <span className="text-black">Home</span>
             </Link>
-            <Link href={"/login/"}>
-                        <span>cred</span>
-                    </Link>
-            <Link href={"/register/"}>
-                        <span>reg</span>
-                    </Link>
 
             <div className="flex items-center gap-5 text-black">
                 {session && session?.user ? (
@@ -40,12 +34,9 @@ const session = await auth();
                         </Link>
                     </>
                 ) : (
-                    <form action={async() => {
-                        "use server"
-
-                        await signIn('github')}}>
-                        <button type="submit">Login</button>
-                    </form>
+                    <Link href="/login/">
+                            <span>Log In</span>
+                        </Link>
                 )}
             </div>
         </nav>
