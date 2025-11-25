@@ -10,12 +10,14 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-arial: var(--arial);
+  --font-ariblk: var(--ariblk);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: white;
+    --foreground: #0a0a0a;
   }
 }
 
@@ -23,4 +25,79 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.vehicle-card {
+  @apply bg-white dark:bg-gray-900 rounded-2xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 p-5 transition-transform transform hover:scale-105;
+}
+
+.vehicle-card .card-header {
+  @apply flex justify-between items-center mb-4;
+}
+
+.vehicle-card .card-date {
+  @apply text-gray-500 text-sm;
+}
+
+.vehicle-card .card-views {
+  @apply flex items-center gap-2 text-gray-600 font-medium text-sm;
+}
+
+.vehicle-card .card-author {
+  @apply flex-1;
+}
+
+.vehicle-card .author-name {
+  @apply text-gray-800 dark:text-gray-200 font-medium text-base line-clamp-1;
+}
+
+.vehicle-card .vehicle-title {
+  @apply text-gray-900 dark:text-white font-semibold text-xl line-clamp-1 mt-1;
+}
+
+.vehicle-card .author-avatar {
+  @apply w-12 h-12 rounded-full object-cover;
+}
+
+.vehicle-card .card-description {
+  @apply text-gray-700 dark:text-gray-300 text-sm mt-3 line-clamp-3;
+}
+
+.vehicle-card .vehicle-image {
+  @apply w-full h-48 object-cover rounded-xl mt-3;
+}
+
+.vehicle-card .card-footer {
+  @apply flex justify-between items-center mt-4;
+}
+
+.vehicle-card .category-link {
+  @apply text-blue-600 hover:underline font-medium text-sm;
+}
+
+.vehicle-card .details-btn {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-4 rounded-lg transition-colors;
+}
+
+/* Optional: smooth text truncation for description and title */
+.line-clamp-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+vehicle-grid {
+  display: grid;
+  gap: 1.5rem; /* Tailwind gap-6 */
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
