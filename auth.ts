@@ -1,109 +1,141 @@
-/*import NextAuth from "next-auth"
-import GitHub from "next-auth/providers/github"
-import Credentials from "next-auth/providers/credentials"
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: 
-    [
-      Credentials({
-        credentials: {
-          username: { label: "Username" },
-          password: { label: "Password", type: "password" },
-        },
-        async authorize({ request }) {
-          const response = await fetch(request)
-          if (!response.ok) return null
-          return (await response.json()) ?? null
-        },
-      }),GitHub 
-  ],
-
-
-})
-*/
 import NextAuth, { NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GitHub from "next-auth/providers/github";
+import GitHubProvider from "next-auth/providers/github";
 import { client } from "@/sanity/lib/client";
+import { writeClient } from "@/sanity/lib/write-client";
 import bcrypt from "bcryptjs";
 
 export const authConfig: NextAuthConfig = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
-
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-
       async authorize(credentials) {
-  if (!credentials?.email || !credentials?.password) return null;
+        if (!credentials?.email || !credentials?.password) return null;
 
-  const email = String(credentials.email);
-  const password = String(credentials.password);
+        const email = String(credentials.email);
+        const password = String(credentials.password);
 
-  const user = await client.fetch(
-    `*[_type == "user" && email == $email][0]`,
-    { email }
-  );
+        const user = await client.fetch(
+          `*[_type == "user" && email == $email][0]`,
+          { email }
+        );
 
-  if (!user) return null;
+        if (!user) return null;
 
-  const isCorrect = await bcrypt.compare(password, user.password);
-  if (!isCorrect) return null;
+        // If user exists but has no password → GitHub-only account
+        if (!user.password) {
+          return null;
+        }
 
-  return {
-    id: user._id,
-    name: user.name,
-    email: user.email,
-    emailVerified: null, // ⬅⬅⬅ KLJUČNI DEL !!!
-  };
-}
+        const isCorrect = await bcrypt.compare(password, user.password);
+        if (!isCorrect) return null;
 
+        return {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          providers: user.providers ?? ["credentials"],
+          emailVerified: user.emailVerified ?? null,
+        };
+      },
     }),
 
-    GitHub,
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID!,
+      clientSecret: process.env.GITHUB_SECRET!,
+      async profile(profile) {
+        return {
+          id: String(profile.id),
+          name: profile.name || profile.login,
+          email: profile.email,
+          emailVerified: new Date(),
+        };
+      },
+    }),
   ],
 
   session: { strategy: "jwt" },
 
   callbacks: {
-  async jwt({ token, user }) {
-    if (user) {
-      token.user = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        emailVerified: null,  // REQUIRED by AdapterUser
-      };
-    }
+    async jwt({ token, user, account }) {
+      // Credentials login
+      if (user && !account) {
+        token.user = user;
+        return token;
+      }
 
-    return token;
-  },
+      // GitHub login
+      if (account?.provider === "github" && user?.email) {
+        const email = user.email;
 
-  async session({ session, token }) {
-    if (token.user) {
-      session.user = token.user as {
-        id: string;
-        name: string;
-        email: string;
-        emailVerified: Date | null;
-      };
-    }
+        let existingUser = await client.fetch(
+          `*[_type == "user" && email == $email][0]`,
+          { email }
+        );
 
-    return session;
-  },
+        if (existingUser) {
+          const providers = existingUser.providers ?? [];
+          if (!providers.includes("github")) providers.push("github");
+
+          await writeClient.patch(existingUser._id)
+            .set({ githubId: String(user.id), providers })
+            .commit();
+
+          token.user = {
+            id: existingUser._id,
+            name: existingUser.name,
+            email: existingUser.email,
+            providers,
+            emailVerified: existingUser.emailVerified ?? null,
+          };
+
+          return token;
+        }
+
+        // Create new GitHub user
+        const newUser = await writeClient.create({
+          _type: "user",
+          name: user.name,
+          email,
+          githubId: String(user.id),
+          providers: ["github"],
+          password: null,
+          emailVerified: new Date(),
+        });
+
+        token.user = {
+          id: newUser._id,
+          name: newUser.name,
+          email: newUser.email,
+          providers: ["github"],
+          emailVerified: newUser.emailVerified,
+        };
+      }
+
+      return token;
+    },
+
+    async session({ session, token }) {
+      if (token.user) {
+        session.user = token.user as {
+          id: string;
+          name: string;
+          email: string;
+          providers: string[];
+          emailVerified: Date | null;
+        };
+      }
+      return session;
+    },
 
     authorized() {
       return true;
-    }
+    },
   },
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
-
-
-
-
-

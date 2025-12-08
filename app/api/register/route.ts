@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Preveri ali uporabnik že obstaja
+    // Check if user already exists
     const existingUser = await writeClient.fetch(
       `*[_type == "user" && email == $email][0]`,
       { email }
@@ -29,27 +29,28 @@ export async function POST(req: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Ustvari uporabnika v Sanity
+    // Create user in Sanity
     const newUser = await writeClient.create({
       _type: "user",
       name,
       email,
       password: hashedPassword,
+      providers: ["credentials"], // mark as credentials account
+      githubId: null,             // placeholder for future GitHub linking
+      emailVerified: null,
     });
-console.log("Incoming data:", { name, email, password });
+
+    console.log("New user registered:", { name, email });
 
     return NextResponse.json(
       { message: "User created successfully", userId: newUser._id },
       { status: 201 }
     );
   } catch (error) {
-    console.error(error);
     console.error("Register error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
-      
     );
   }
 }
-

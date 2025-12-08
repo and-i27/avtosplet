@@ -14,33 +14,42 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
 
-    const res = await fetch("/api/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    const data = await res.json();
-    setLoading(false);
+      const data = await res.json();
+      setLoading(false);
 
-    if (res.ok) {
-      alert("Registration successful! You can now log in.");
-      router.push("../login");
-    } else {
-      alert(data.error || "Something went wrong");
+      if (res.ok) {
+        alert("Registration successful! You can now log in.");
+        router.push("/login");
+      } else {
+        alert(data.error || "Something went wrong");
+      }
+    } catch (err) {
+      console.error("Registration error:", err);
+      setLoading(false);
+      alert("Internal server error. Please try again later.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-sm mx-auto mt-10 p-4 border rounded">
-      <h2 className="text-xl mb-4">Register</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-sm mx-auto mt-10 p-6 border rounded shadow"
+    >
+      <h2 className="text-2xl font-semibold mb-4">Register</h2>
 
       <input
         type="text"
         placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="w-full p-2 mb-2 border rounded"
+        className="w-full p-2 mb-3 border rounded"
         required
       />
 
@@ -49,7 +58,7 @@ export default function RegisterPage() {
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="w-full p-2 mb-2 border rounded"
+        className="w-full p-2 mb-3 border rounded"
         required
       />
 
@@ -58,17 +67,25 @@ export default function RegisterPage() {
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="w-full p-2 mb-2 border rounded"
+        className="w-full p-2 mb-4 border rounded"
         required
       />
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        aria-busy={loading}
+        className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
         {loading ? "Registering..." : "Register"}
       </button>
+
+      <p className="text-center text-sm mt-3">
+        Already have an account?{" "}
+        <a href="/login" className="text-blue-600 underline">
+          Log in
+        </a>
+      </p>
     </form>
   );
 }
