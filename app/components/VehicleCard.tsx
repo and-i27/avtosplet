@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
-type VehicleTypeCard = {
+export type VehicleTypeCard = {
   _id: string;
   views: number;
   user: {
@@ -38,8 +38,8 @@ const VehicleCard = ({ post }: { post: VehicleTypeCard }) => {
   const mainImage = images && images.length > 0 ? images[0].asset.url : "/placeholder.png";
 
   return (
-    <li className="vehicle-card border rounded-lg p-4 shadow-sm">
-      {/* Header: Date + Views */}
+    <li className="vehicle-card border rounded-lg p-4 shadow-sm bg-white  transition-transform transform hover:scale-105">
+      {/* Header: Views */}
       <div className="flex justify-between text-sm text-gray-500 mb-2">
         <p>{views} views</p>
       </div>
@@ -48,15 +48,17 @@ const VehicleCard = ({ post }: { post: VehicleTypeCard }) => {
       <div className="flex justify-between items-center mb-2">
         <div>
           <Link href={`/user/${authorId}`}>
-            <p className="font-medium text-gray-700">{name}</p>
+            <p className="font-medium text-gray-700 ">{name}</p>
           </Link>
           <Link href={`/vehicle/${_id}`}>
-            <h3 className="text-lg font-semibold">{brand} {model}</h3>
+            <h3 className="text-lg font-semibold text-gray-900 ">
+              {brand} {model}
+            </h3>
           </Link>
         </div>
       </div>
 
-      {/* Description + Main Image */}
+      {/* Main Image */}
       <Link href={`/vehicle/${_id}`} className="block mb-2">
         <Image
           src={mainImage}
@@ -68,7 +70,7 @@ const VehicleCard = ({ post }: { post: VehicleTypeCard }) => {
       </Link>
 
       {/* Specs */}
-      <div className="text-sm text-gray-700 mb-2 grid grid-cols-2 gap-2">
+      <div className="text-sm text-gray-700  mb-2 grid grid-cols-2 gap-2">
         <p><strong>Price:</strong> €{price}</p>
         <p><strong>Year:</strong> {year}</p>
         <p><strong>Kilometers:</strong> {kilometers} km</p>

@@ -28,9 +28,8 @@ body {
 }
 
 .vehicle-card {
-  @apply bg-white border border-gray-200 shadow-md rounded-xl overflow-hidden transition-transform transform hover:scale-105 hover:shadow-lg;
+  @apply bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 shadow-md overflow-hidden transition-transform transform hover:scale-105 hover:shadow-lg;
 }
-
 
 .vehicle-card img,
 .vehicle-card .vehicle-image {
