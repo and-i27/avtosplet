@@ -40,9 +40,7 @@ const VehicleCard = ({ post }: { post: VehicleTypeCard }) => {
   return (
     <li className="vehicle-card border rounded-lg p-4 shadow-sm bg-white  transition-transform transform hover:scale-105">
       {/* Header: Views */}
-      <div className="flex justify-between text-sm text-gray-500 mb-2">
-        <p>{views} views</p>
-      </div>
+      
 
       {/* Author + Title */}
       <div className="flex justify-between items-center mb-2">
@@ -79,8 +77,9 @@ const VehicleCard = ({ post }: { post: VehicleTypeCard }) => {
       </div>
 
       {/* Footer: Details Button */}
-      <div className="flex justify-end">
-        <Button className="px-3 py-1" asChild>
+      <div className="flex justify-between text-sm text-gray-500 mb-2">
+        <p>{views} views</p>
+        <Button className="details-btn" asChild>
           <Link href={`/vehicle/${_id}`}>Details</Link>
         </Button>
       </div>

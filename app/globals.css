@@ -73,7 +73,7 @@ body {
 }
 
 .vehicle-card .details-btn {
-  @apply bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium text-sm py-2 px-4 rounded-lg transition-colors;
+  @apply bg-white   text-black font-medium text-sm py-2 px-4 rounded-lg transition-colors;
 }
 
 
