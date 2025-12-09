@@ -19,7 +19,7 @@ export const user = defineType({
       name: "password",
       type: "string",
       title: "Password",
-      hidden: false, // hide passwords in Sanity Studio
+      hidden: true, // hide passwords in Sanity Studio
     },
     {
       name: "githubId",

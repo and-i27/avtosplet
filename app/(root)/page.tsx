@@ -1,32 +1,10 @@
 import VehicleCard from "../components/VehicleCard";
+import {client} from "@/sanity/lib/client";
+import { VEHICLE_QUERY } from '../../sanity/lib/queries';
 
-export default function Home() {
-  const posts = [
-    {
-      _cratedAt: new Date(),
-      views: 55,
-      author: { _id: 1, name: "Andi" },
-      _id: 1,
-      description: "To je opis",
-      image:
-        "https://hips.hearstapps.com/hmg-prod/images/original-13270-s7-2024-6701-66d8a83a30973.jpg?crop=0.647xw:0.458xh;0.122xw,0.247xh&resize=1200:*",
-      category: "Car",
-      title: "Audi A5",
-    },
-    {
-      _cratedAt: new Date(),
-      views: 42,
-      author: { _id: 2, name: "Maja" },
-      _id: 2,
-      description: "Drugi opis vozila",
-      image:
-        "https://hips.hearstapps.com/hmg-prod/images/original-13270-s7-2024-6701-66d8a83a30973.jpg?crop=0.647xw:0.458xh;0.122xw,0.247xh&resize=1200:*",
-      category: "SUV",
-      title: "BMW X5",
-    },
-    // Add more posts here...
-  ];
+export default async function Home() {
 
+const posts = await client.fetch(VEHICLE_QUERY)
   return (
     <>
       <h1 className="text-2xl font-semibold mb-5">Home</h1>

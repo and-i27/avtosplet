@@ -28,23 +28,29 @@ body {
 }
 
 .vehicle-card {
-  @apply bg-white dark:bg-gray-900 rounded-2xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 p-5 transition-transform transform hover:scale-105;
+  @apply bg-white border border-gray-200 shadow-md rounded-xl overflow-hidden transition-transform transform hover:scale-105 hover:shadow-lg;
+}
+
+
+.vehicle-card img,
+.vehicle-card .vehicle-image {
+  @apply w-full h-48 object-cover rounded-t-xl;
 }
 
 .vehicle-card .card-header {
-  @apply flex justify-between items-center mb-4;
+  @apply flex justify-between items-center p-3;
 }
 
 .vehicle-card .card-date {
-  @apply text-gray-500 text-sm;
+  @apply text-gray-500 dark:text-gray-300 text-sm;
 }
 
 .vehicle-card .card-views {
-  @apply flex items-center gap-2 text-gray-600 font-medium text-sm;
+  @apply text-gray-600 dark:text-gray-200 text-sm font-medium;
 }
 
 .vehicle-card .card-author {
-  @apply flex-1;
+  @apply flex flex-col justify-between;
 }
 
 .vehicle-card .author-name {
@@ -52,32 +58,25 @@ body {
 }
 
 .vehicle-card .vehicle-title {
-  @apply text-gray-900 dark:text-white font-semibold text-xl line-clamp-1 mt-1;
-}
-
-.vehicle-card .author-avatar {
-  @apply w-12 h-12 rounded-full object-cover;
+  @apply text-gray-900 dark:text-white font-semibold text-lg mt-1 line-clamp-1;
 }
 
 .vehicle-card .card-description {
-  @apply text-gray-700 dark:text-gray-300 text-sm mt-3 line-clamp-3;
-}
-
-.vehicle-card .vehicle-image {
-  @apply w-full h-48 object-cover rounded-xl mt-3;
+  @apply text-gray-700 dark:text-gray-300 text-sm mt-2 line-clamp-3;
 }
 
 .vehicle-card .card-footer {
-  @apply flex justify-between items-center mt-4;
+  @apply flex justify-between items-center p-3;
 }
 
 .vehicle-card .category-link {
-  @apply text-blue-600 hover:underline font-medium text-sm;
+  @apply text-blue-600 dark:text-blue-400 hover:underline font-medium text-sm;
 }
 
 .vehicle-card .details-btn {
-  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-4 rounded-lg transition-colors;
+  @apply bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium text-sm py-2 px-4 rounded-lg transition-colors;
 }
+
 
 /* Optional: smooth text truncation for description and title */
 .line-clamp-1 {

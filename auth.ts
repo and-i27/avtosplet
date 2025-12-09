@@ -6,6 +6,7 @@ import { writeClient } from "@/sanity/lib/write-client";
 import bcrypt from "bcryptjs";
 
 export const authConfig: NextAuthConfig = {
+  secret: process.env.AUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: "Credentials",

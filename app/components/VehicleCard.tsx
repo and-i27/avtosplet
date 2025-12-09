@@ -1,62 +1,84 @@
 import React from "react";
-import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
+type VehicleTypeCard = {
+  _id: string;
+  views: number;
+  user: {
+    _id: string;
+    name: string;
+  };
+  brand: string;
+  model: string;
+  price: number;
+  year: number;
+  kilometers: number;
+  fuel: string;
+  gearbox: string;
+  images?: { asset: { url: string } }[];
+};
+
 const VehicleCard = ({ post }: { post: VehicleTypeCard }) => {
   const {
-    _cratedAt,
     views,
-    author: { _id: authorId, name },
-    title,
-    category,
+    user: { _id: authorId, name },
+    brand,
+    model,
+    price,
+    year,
+    kilometers,
+    fuel,
+    gearbox,
+    images,
     _id,
-    image,
-    description,
   } = post;
 
+  const mainImage = images && images.length > 0 ? images[0].asset.url : "/placeholder.png";
+
   return (
-    <li className="vehicle-card">
+    <li className="vehicle-card border rounded-lg p-4 shadow-sm">
       {/* Header: Date + Views */}
-      <div className="card-header">
-        <p className="card-date">{formatDate(_cratedAt)}</p>
-        <div className="card-views">{views} views</div>
+      <div className="flex justify-between text-sm text-gray-500 mb-2">
+        <p>{views} views</p>
       </div>
 
       {/* Author + Title */}
-      <div className="flex justify-between items-center">
-        <div className="card-author">
+      <div className="flex justify-between items-center mb-2">
+        <div>
           <Link href={`/user/${authorId}`}>
-            <p className="author-name">{name}</p>
+            <p className="font-medium text-gray-700">{name}</p>
           </Link>
           <Link href={`/vehicle/${_id}`}>
-            <h3 className="vehicle-title">{title}</h3>
+            <h3 className="text-lg font-semibold">{brand} {model}</h3>
           </Link>
         </div>
-        <Link href={`/user/${authorId}`}>
-          <Image
-            src="https://placehold.co/48x48"
-            alt={name}
-            width={48}
-            height={48}
-            className="author-avatar"
-          />
-        </Link>
       </div>
 
-      {/* Description + Image */}
-      <Link href={`/vehicle/${_id}`}>
-        <p className="card-description">{description}</p>
-        <img src={image} alt={title} className="vehicle-image" />
+      {/* Description + Main Image */}
+      <Link href={`/vehicle/${_id}`} className="block mb-2">
+        <Image
+          src={mainImage}
+          alt={`${brand} ${model}`}
+          width={400}
+          height={250}
+          className="w-full h-auto rounded-md object-cover"
+        />
       </Link>
 
-      {/* Footer: Category + Details Button */}
-      <div className="card-footer">
-        <Link href={`/?query=${category.toLowerCase()}`} className="category-link">
-          {category}
-        </Link>
-        <Button className="details-btn" asChild>
+      {/* Specs */}
+      <div className="text-sm text-gray-700 mb-2 grid grid-cols-2 gap-2">
+        <p><strong>Price:</strong> €{price}</p>
+        <p><strong>Year:</strong> {year}</p>
+        <p><strong>Kilometers:</strong> {kilometers} km</p>
+        <p><strong>Fuel:</strong> {fuel}</p>
+        <p><strong>Gearbox:</strong> {gearbox}</p>
+      </div>
+
+      {/* Footer: Details Button */}
+      <div className="flex justify-end">
+        <Button className="px-3 py-1" asChild>
           <Link href={`/vehicle/${_id}`}>Details</Link>
         </Button>
       </div>
