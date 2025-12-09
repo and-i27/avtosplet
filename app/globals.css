@@ -28,7 +28,7 @@ body {
 }
 
 .vehicle-card {
-  @apply bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 shadow-md overflow-hidden transition-transform transform hover:scale-105 hover:shadow-lg;
+  @apply bg-white  rounded-xl border border-gray-200  shadow-md overflow-hidden transition-transform transform hover:scale-105 hover:shadow-lg;
 }
 
 .vehicle-card img,
@@ -41,11 +41,11 @@ body {
 }
 
 .vehicle-card .card-date {
-  @apply text-gray-500 dark:text-gray-300 text-sm;
+  @apply text-gray-500  text-sm;
 }
 
 .vehicle-card .card-views {
-  @apply text-gray-600 dark:text-gray-200 text-sm font-medium;
+  @apply text-gray-600  text-sm font-medium;
 }
 
 .vehicle-card .card-author {
@@ -53,15 +53,15 @@ body {
 }
 
 .vehicle-card .author-name {
-  @apply text-gray-800 dark:text-gray-200 font-medium text-base line-clamp-1;
+  @apply text-gray-800  font-medium text-base line-clamp-1;
 }
 
 .vehicle-card .vehicle-title {
-  @apply text-gray-900 dark:text-white font-semibold text-lg mt-1 line-clamp-1;
+  @apply text-gray-900  font-semibold text-lg mt-1 line-clamp-1;
 }
 
 .vehicle-card .card-description {
-  @apply text-gray-700 dark:text-gray-300 text-sm mt-2 line-clamp-3;
+  @apply text-gray-700  text-sm mt-2 line-clamp-3;
 }
 
 .vehicle-card .card-footer {
@@ -69,12 +69,13 @@ body {
 }
 
 .vehicle-card .category-link {
-  @apply text-blue-600 dark:text-blue-400 hover:underline font-medium text-sm;
+  @apply text-blue-600  hover:underline font-medium text-sm;
 }
 
 .vehicle-card .details-btn {
   @apply bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium text-sm py-2 px-4 rounded-lg transition-colors;
 }
+
 
 
 /* Optional: smooth text truncation for description and title */
