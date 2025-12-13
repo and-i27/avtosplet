@@ -21,22 +21,24 @@ type RawVehicle = {
   user?: { _id: string; name?: string };
 };
 
-export default function SearchPage() {
+export default function SearchClient() {
   const searchParams = useSearchParams();
   const [vehicles, setVehicles] = useState<VehicleTypeCard[]>([]);
 
-  // izračun parametrov iz URL
-  const params = useMemo(() => ({
-    brand: searchParams.get("brand") || "",
-    model: searchParams.get("model") || "",
-    fuel: searchParams.get("fuel") || "",
-    gearbox: searchParams.get("gearbox") || "",
-    color: searchParams.get("color") || "",
-    minPrice: searchParams.get("minPrice") || "",
-    maxPrice: searchParams.get("maxPrice") || "",
-    minYear: searchParams.get("minYear") || "",
-    maxYear: searchParams.get("maxYear") || "",
-  }), [searchParams]);
+  const params = useMemo(
+    () => ({
+      brand: searchParams.get("brand") || "",
+      model: searchParams.get("model") || "",
+      fuel: searchParams.get("fuel") || "",
+      gearbox: searchParams.get("gearbox") || "",
+      color: searchParams.get("color") || "",
+      minPrice: searchParams.get("minPrice") || "",
+      maxPrice: searchParams.get("maxPrice") || "",
+      minYear: searchParams.get("minYear") || "",
+      maxYear: searchParams.get("maxYear") || "",
+    }),
+    [searchParams]
+  );
 
   useEffect(() => {
     async function fetchVehicles() {
@@ -67,39 +69,38 @@ export default function SearchPage() {
 
       const results: RawVehicle[] = await client.fetch(query);
 
-      // mapiranje surovih rezultatov v tip VehicleTypeCard
-      const mappedVehicles: VehicleTypeCard[] = results.map((v) => ({
-  _id: v._id,
-  views: v.views || 0,
-  user: {
-    _id: v.user?._id || "unknown",
-    name: v.user?.name || "Unknown", // zagotovimo vedno string
-  },
-  brand: v.brand?.name || "N/A",
-  model: v.model?.name || "N/A",
-  price: v.price,
-  year: v.year,
-  kilometers: v.kilometers || 0,
-  fuel: v.fuel?.name || "N/A",
-  gearbox: v.gearbox?.name || "N/A",
-  images: v.images,
-}));
+      const mapped: VehicleTypeCard[] = results.map(v => ({
+        _id: v._id,
+        views: v.views || 0,
+        user: {
+          _id: v.user?._id || "unknown",
+          name: v.user?.name || "Unknown",
+        },
+        brand: v.brand?.name || "N/A",
+        model: v.model?.name || "N/A",
+        price: v.price,
+        year: v.year,
+        kilometers: v.kilometers || 0,
+        fuel: v.fuel?.name || "N/A",
+        gearbox: v.gearbox?.name || "N/A",
+        images: v.images,
+      }));
 
-
-      setVehicles(mappedVehicles);
+      setVehicles(mapped);
     }
 
     fetchVehicles();
-  }, [params]); // sedaj je useEffect odvisen od params, kar ESLint dopušča
+  }, [params]);
 
   return (
     <div className="p-6">
       <h1 className="text-2xl mb-4">Rezultati iskanja</h1>
+
       {vehicles.length === 0 ? (
         <p>Ni rezultatov.</p>
       ) : (
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {vehicles.map((v) => (
+          {vehicles.map(v => (
             <VehicleCard key={v._id} post={v} />
           ))}
         </ul>
