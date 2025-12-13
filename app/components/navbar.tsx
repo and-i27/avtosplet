@@ -15,7 +15,7 @@ const session = await auth();
             <div className="flex items-center gap-5 text-black">
                 {session && session?.user ? (
                     <>
-                        <Link href="/app/">
+                        <Link href="/vehicle/create">
                             <span>Create</span>
                         </Link>
 

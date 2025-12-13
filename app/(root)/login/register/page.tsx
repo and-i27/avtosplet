@@ -38,54 +38,54 @@ export default function RegisterPage() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-sm mx-auto mt-10 p-6 border rounded shadow"
-    >
-      <h2 className="text-2xl font-semibold mb-4">Register</h2>
-
-      <input
-        type="text"
-        placeholder="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full p-2 mb-3 border rounded"
-        required
-      />
-
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full p-2 mb-3 border rounded"
-        required
-      />
-
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="w-full p-2 mb-4 border rounded"
-        required
-      />
-
-      <button
-        type="submit"
-        disabled={loading}
-        aria-busy={loading}
-        className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-sm w-full bg-white p-6 border rounded shadow"
       >
-        {loading ? "Registering..." : "Register"}
-      </button>
+        <h2 className="text-2xl font-semibold mb-4 text-center">Register</h2>
 
-      <p className="text-center text-sm mt-3">
-        Already have an account?{" "}
-        <a href="/login" className="text-blue-600 underline">
-          Log in
-        </a>
-      </p>
-    </form>
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full p-2 mb-3 border rounded"
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 mb-3 border rounded"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 mb-4 border rounded"
+          required
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          aria-busy={loading}
+          className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          {loading ? "Registering..." : "Register"}
+        </button>
+
+        <p className="text-center text-sm mt-3">
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-600 underline">
+            Log in
+          </a>
+        </p>
+      </form>
+    </div>
   );
 }

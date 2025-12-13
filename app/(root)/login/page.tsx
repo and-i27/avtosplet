@@ -24,7 +24,7 @@ export default function LoginPage() {
       setLoading(false);
 
       if (!res?.error) {
-        router.push("/");
+        router.push("/"); // redirect after successful login
       } else {
         alert(res.error || "Invalid email or password");
       }

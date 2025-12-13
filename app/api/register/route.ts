@@ -7,10 +7,7 @@ export async function POST(req: NextRequest) {
     const { name, email, password } = await req.json();
 
     if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: "All fields are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
     // Check if user already exists
@@ -20,10 +17,7 @@ export async function POST(req: NextRequest) {
     );
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "User already exists" }, { status: 400 });
     }
 
     // Hash password
@@ -36,11 +30,8 @@ export async function POST(req: NextRequest) {
       email,
       password: hashedPassword,
       providers: ["credentials"], // mark as credentials account
-      githubId: null,             // placeholder for future GitHub linking
       emailVerified: null,
     });
-
-    console.log("New user registered:", { name, email });
 
     return NextResponse.json(
       { message: "User created successfully", userId: newUser._id },
@@ -48,9 +39,6 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error("Register error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

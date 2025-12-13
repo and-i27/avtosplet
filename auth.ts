@@ -2,11 +2,9 @@ import NextAuth, { NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import { client } from "@/sanity/lib/client";
-import { writeClient } from "@/sanity/lib/write-client";
 import bcrypt from "bcryptjs";
 
 export const authConfig: NextAuthConfig = {
-  secret: process.env.AUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -62,63 +60,22 @@ export const authConfig: NextAuthConfig = {
   session: { strategy: "jwt" },
 
   callbacks: {
-    async jwt({ token, user, account }) {
-      // Credentials login
-      if (user && !account) {
-        token.user = user;
-        return token;
-      }
+    async jwt({ token, user, }) {
+  // When a user logs in (both GitHub & Credentials)
+  if (user) {
+    // Always store sanity user fields
+    token.user = {
+      id: user.id, // Sanity ID here
+      name: user.name,
+      email: user.email,
+      providers: user.providers ?? [],
+      emailVerified: user.emailVerified ?? null,
+    };
+  }
 
-      // GitHub login
-      if (account?.provider === "github" && user?.email) {
-        const email = user.email;
-
-        let existingUser = await client.fetch(
-          `*[_type == "user" && email == $email][0]`,
-          { email }
-        );
-
-        if (existingUser) {
-          const providers = existingUser.providers ?? [];
-          if (!providers.includes("github")) providers.push("github");
-
-          await writeClient.patch(existingUser._id)
-            .set({ githubId: String(user.id), providers })
-            .commit();
-
-          token.user = {
-            id: existingUser._id,
-            name: existingUser.name,
-            email: existingUser.email,
-            providers,
-            emailVerified: existingUser.emailVerified ?? null,
-          };
-
-          return token;
-        }
-
-        // Create new GitHub user
-        const newUser = await writeClient.create({
-          _type: "user",
-          name: user.name,
-          email,
-          githubId: String(user.id),
-          providers: ["github"],
-          password: null,
-          emailVerified: new Date(),
-        });
-
-        token.user = {
-          id: newUser._id,
-          name: newUser.name,
-          email: newUser.email,
-          providers: ["github"],
-          emailVerified: newUser.emailVerified,
-        };
-      }
-
-      return token;
-    },
+  return token;
+}
+,
 
     async session({ session, token }) {
       if (token.user) {

@@ -100,3 +100,7 @@ vehicle-grid {
   gap: 1.5rem; /* Tailwind gap-6 */
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
+
+.input {
+  @apply w-full p-2 border rounded-md;
+}
