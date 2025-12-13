@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { client } from "@/sanity/lib/client";
 import Link from "next/link";
 
 type Vehicle = {
@@ -19,38 +18,52 @@ export default function MyVehiclesPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
 
+  /* ---------- FETCH VEHICLES (API, ne Sanity) ---------- */
+
   useEffect(() => {
     async function fetchVehicles() {
       if (!session?.user?.id) return;
-      const results: Vehicle[] = await client.fetch(
-        `*[_type=="vehicle" && user._ref == $userId]{
-          _id,
-          brand->{name},
-          model->{name},
-          year,
-          price,
-          images[]{asset->{url}}
-        }`,
-        { userId: session.user.id }
-      );
-      setVehicles(results);
-      setLoading(false);
+
+      try {
+        const res = await fetch("/api/vehicles/my");
+        const data = await res.json();
+
+        setVehicles(data ?? []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
+
     fetchVehicles();
   }, [session?.user?.id]);
 
-  const handleDelete = async (id: string) => {
+  /* ---------- DELETE (placeholder – backend jutri) ---------- */
+
+  async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this vehicle?")) return;
-    await client.delete(id);
-    setVehicles(prev => prev.filter(v => v._id !== id));
-  };
+
+    try {
+      await fetch(`/api/vehicles/${id}`, {
+        method: "DELETE",
+      });
+
+      setVehicles(prev => prev.filter(v => v._id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Delete failed");
+    }
+  }
+
+  /* ---------- STATES ---------- */
 
   if (!session?.user) {
-    return <p className="text-center mt-10">You must be logged in to view your vehicles.</p>;
+    return <p className="text-center mt-10">You must be logged in.</p>;
   }
 
   if (loading) {
-    return <p className="text-center mt-10">Loading...</p>;
+    return <p className="text-center mt-10">Loading…</p>;
   }
 
   return (
@@ -63,17 +76,33 @@ export default function MyVehiclesPage() {
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {vehicles.map(vehicle => (
             <li key={vehicle._id} className="border rounded p-4 space-y-2">
-              {vehicle.images?.[0]?.asset.url && (
-                <img src={vehicle.images[0].asset.url} alt={`${vehicle.brand.name} ${vehicle.model.name}`} className="w-full h-48 object-cover rounded"/>
+              {vehicle.images?.[0]?.asset?.url && (
+                <img
+                  src={vehicle.images[0].asset.url}
+                  alt={`${vehicle.brand.name} ${vehicle.model.name}`}
+                  className="w-full h-48 object-cover rounded"
+                />
               )}
-              <h2 className="text-lg font-semibold">{vehicle.brand.name} {vehicle.model.name}</h2>
+
+              <h2 className="text-lg font-semibold">
+                {vehicle.brand.name} {vehicle.model.name}
+              </h2>
+
               <p>Year: {vehicle.year}</p>
               <p>Price: €{vehicle.price}</p>
+
               <div className="flex gap-2 mt-2">
-                <Link href={`/vehicle/edit/${vehicle._id}`} className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                <Link
+                  href={`/vehicle/edit/${vehicle._id}`}
+                  className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                >
                   Edit
                 </Link>
-                <button onClick={() => handleDelete(vehicle._id)} className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+
+                <button
+                  onClick={() => handleDelete(vehicle._id)}
+                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                >
                   Delete
                 </button>
               </div>
