@@ -1,5 +1,7 @@
 import { writeClient } from "@/sanity/lib/write-client";
 import { NextRequest, NextResponse } from "next/server";
+import { nanoid } from "nanoid";
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,19 +30,25 @@ export async function POST(req: NextRequest) {
     const description = formData.get("description") as string;
 
     // 🖼️ upload images
-    const imageFiles = formData.getAll("images") as File[];
-    const imageRefs = [];
+    // 🖼️ upload images
+const imageFiles = formData.getAll("images") as File[];
+const imageRefs: any[] = [];
 
-    for (const file of imageFiles) {
-      const asset = await writeClient.assets.upload("image", file, {
-        filename: file.name,
-      });
+for (const file of imageFiles) {
+  const asset = await writeClient.assets.upload("image", file, {
+    filename: file.name,
+  });
 
-      imageRefs.push({
-        _type: "image",
-        asset: { _type: "reference", _ref: asset._id },
-      });
-    }
+  imageRefs.push({
+    _key: nanoid(),                    // ✅ OBVEZNO
+    _type: "image",
+    asset: {
+      _type: "reference",
+      _ref: asset._id,
+    },
+  });
+}
+
 
     const vehicleDoc = {
       _type: "vehicle",
