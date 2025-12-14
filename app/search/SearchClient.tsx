@@ -92,7 +92,7 @@ export default function SearchClient() {
   }, [params]);
 
   return (
-    <div className="p-6">
+    <div>
       {vehicles.length === 0 ? (
         <p>Ni rezultatov.</p>
       ) : (
