@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
+
 
 type Vehicle = {
   _id: string;
@@ -85,11 +87,7 @@ export default function ProfilePage() {
             {vehicles.map(vehicle => (
               <li key={vehicle._id} className="border rounded p-4 space-y-2">
                 {vehicle.images?.[0]?.asset?.url && (
-                  <img
-                    src={vehicle.images[0].asset.url}
-                    alt={`${vehicle.brand.name} ${vehicle.model.name}`}
-                    className="w-full h-48 object-cover rounded"
-                  />
+                  <Image src={vehicle.images[0].asset.url} alt={`${vehicle.brand.name} ${vehicle.model.name}`} width={96} height={96} className="w-full h-48 object-cover rounded" />
                 )}
                 <h3 className="text-lg font-semibold">
                   {vehicle.brand.name} {vehicle.model.name}

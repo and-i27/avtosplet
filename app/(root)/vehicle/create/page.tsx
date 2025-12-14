@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
+
 
 type Option = { _id: string; name: string };
 
@@ -97,9 +99,11 @@ export default function AddVehiclePage() {
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (!e.target.files) return;
-    setForm(prev => ({ ...prev, images: Array.from(e.target.files) }));
-  }
+  const files = e.target.files;
+  if (!files) return;
+  setForm(prev => ({ ...prev, images: Array.from(files) }));
+}
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -251,12 +255,8 @@ export default function AddVehiclePage() {
           key={index}
           className="relative group rounded-lg overflow-hidden border"
         >
-          <img
-            src={URL.createObjectURL(file)}
-            alt={`Preview ${index}`}
-            className="h-24 w-full object-cover"
-          />
 
+<Image src={URL.createObjectURL(file)} alt={`Preview ${index}`} width={96} height={96} className="h-24 w-full object-cover" />
           <button
             type="button"
             onClick={() => removeImage(index)}

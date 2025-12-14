@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
 
 type Option = { _id: string; name: string };
 type ExistingImage = { _key: string; _ref: string; url: string };
@@ -114,9 +115,11 @@ export default function EditVehiclePage() {
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (!e.target.files) return;
-    setForm(prev => ({ ...prev, images: Array.from(e.target.files) }));
-  }
+  const files = e.target.files;
+  if (!files) return;
+  setForm(prev => ({ ...prev, images: Array.from(files) }));
+}
+
 
   function removeImage(index: number) {
     setForm(prev => ({
@@ -217,7 +220,7 @@ export default function EditVehiclePage() {
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-2">
                 {form.existingImages.map(img => (
                   <div key={img._key} className="relative group rounded-lg overflow-hidden border">
-                    <img src={img.url} alt="Existing" className="h-24 w-full object-cover" />
+                    <Image src={img.url} alt="Existing" width={96} height={96} className="h-24 w-full object-cover" />
                     <button type="button" onClick={() => removeExistingImage(img._key)} className="absolute top-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">✕</button>
                   </div>
                 ))}
@@ -235,7 +238,7 @@ export default function EditVehiclePage() {
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3">
                 {form.images.map((file, index) => (
                   <div key={index} className="relative group rounded-lg overflow-hidden border">
-                    <img src={URL.createObjectURL(file)} alt={`Preview ${index}`} className="h-24 w-full object-cover" />
+                    <Image src={URL.createObjectURL(file)} alt={`Preview ${index}`} width={96} height={96} className="h-24 w-full object-cover" />
                     <button type="button" onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">✕</button>
                   </div>
                 ))}
