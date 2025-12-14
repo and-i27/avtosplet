@@ -138,3 +138,28 @@ export async function PUT(
     return NextResponse.json({ error: "Failed to update vehicle" }, { status: 500 });
   }
 }
+
+/* =====================================================
+   DELETE – delete vehicle
+===================================================== */
+export async function DELETE(
+  _: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const params = await context.params;
+    const { id } = params;
+
+    if (!id) {
+      return NextResponse.json({ error: "ID is required" }, { status: 400 });
+    }
+
+    // Delete vozilo
+    await writeClient.delete(id);
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("DELETE vehicle error:", err);
+    return NextResponse.json({ error: "Failed to delete vehicle" }, { status: 500 });
+  }
+}

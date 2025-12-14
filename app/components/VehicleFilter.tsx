@@ -123,6 +123,73 @@ export default function VehicleFilter() {
       <input placeholder="Min letnik" type="number" value={filters.minYear} onChange={(e) => update("minYear", e.target.value)} className="input"/>
       <input placeholder="Max letnik" type="number" value={filters.maxYear} onChange={(e) => update("maxYear", e.target.value)} className="input"/>
 
+      {/* Vrata */}
+<input
+  placeholder="Vrata"
+  type="number"
+  value={filters.doors}
+  onChange={(e) => update("doors", e.target.value)}
+  className="input"
+/>
+
+{/* Sedeži */}
+<input
+  placeholder="Sedeži"
+  type="number"
+  value={filters.seats}
+  onChange={(e) => update("seats", e.target.value)}
+  className="input"
+/>
+
+{/* Kilometri */}
+<input
+  placeholder="Min km"
+  type="number"
+  value={filters.minKm}
+  onChange={(e) => update("minKm", e.target.value)}
+  className="input"
+/>
+<input
+  placeholder="Max km"
+  type="number"
+  value={filters.maxKm}
+  onChange={(e) => update("maxKm", e.target.value)}
+  className="input"
+/>
+
+{/* Moč (kW) */}
+<input
+  placeholder="Min kW"
+  type="number"
+  value={filters.minKw}
+  onChange={(e) => update("minKw", e.target.value)}
+  className="input"
+/>
+<input
+  placeholder="Max kW"
+  type="number"
+  value={filters.maxKw}
+  onChange={(e) => update("maxKw", e.target.value)}
+  className="input"
+/>
+
+{/* Prostornina motorja (ccm) */}
+<input
+  placeholder="Min ccm"
+  type="number"
+  value={filters.minCcm}
+  onChange={(e) => update("minCcm", e.target.value)}
+  className="input"
+/>
+<input
+  placeholder="Max ccm"
+  type="number"
+  value={filters.maxCcm}
+  onChange={(e) => update("maxCcm", e.target.value)}
+  className="input"
+/>
+
+
       <button onClick={handleSearch} className="col-span-full mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
         IŠČI
       </button>

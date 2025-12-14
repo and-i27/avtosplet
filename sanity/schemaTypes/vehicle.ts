@@ -27,4 +27,20 @@ export const vehicle = defineType({
     { name: "views", title: "Views", type: "number", initialValue: 0 },
     { name: "user", title: "User", type: "reference", to: [{ type: "user" }] },
   ],
+
+  // ---------- PREVIEW ----------
+  preview: {
+    select: {
+      brandName: "brand.name",
+      modelName: "model.name",
+      userName: "user.name"
+    },
+    prepare(selection) {
+      const { brandName, modelName, userName } = selection;
+      return {
+        title: `${brandName || "N/A"} ${modelName || "N/A"}`, // prikaz brand + model
+        subtitle: `${userName || "N/A"}`,
+      };
+    },
+  },
 });

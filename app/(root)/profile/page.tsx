@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 
-
 type Vehicle = {
   _id: string;
   brand: { name: string };
@@ -26,10 +25,11 @@ export default function ProfilePage() {
       if (!session?.user?.id) return;
 
       try {
-        const res = await fetch("/api/vehicles/my");
+        const res = await fetch("/api/vehicles/my", {
+          headers: { "x-user-id": session.user.id },
+        });
         const data = await res.json();
 
-        // varnost: preverimo, da je data array
         setVehicles(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
@@ -46,21 +46,22 @@ export default function ProfilePage() {
     if (!confirm("Are you sure you want to delete this vehicle?")) return;
 
     try {
-      await fetch(`/api/vehicles/${id}`, { method: "DELETE" });
-      setVehicles(prev => prev.filter(v => v._id !== id));
+      const res = await fetch(`/api/vehicles/${id}`, { method: "DELETE" });
+      const data = await res.json();
+
+      if (data.success) {
+        setVehicles((prev) => prev.filter((v) => v._id !== id));
+      } else {
+        alert("Delete failed");
+      }
     } catch (err) {
       console.error(err);
       alert("Delete failed");
     }
   }
 
-  if (!session?.user) {
-    return <p className="text-center mt-10">You must be logged in.</p>;
-  }
-
-  if (loading) {
-    return <p className="text-center mt-10">Loading…</p>;
-  }
+  if (!session?.user) return <p className="text-center mt-10">You must be logged in.</p>;
+  if (loading) return <p className="text-center mt-10">Loading…</p>;
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
@@ -84,10 +85,16 @@ export default function ProfilePage() {
           <p>You have not added any vehicles yet.</p>
         ) : (
           <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {vehicles.map(vehicle => (
+            {vehicles.map((vehicle) => (
               <li key={vehicle._id} className="border rounded p-4 space-y-2">
                 {vehicle.images?.[0]?.asset?.url && (
-                  <Image src={vehicle.images[0].asset.url} alt={`${vehicle.brand.name} ${vehicle.model.name}`} width={96} height={96} className="w-full h-48 object-cover rounded" />
+                  <Image
+                    src={vehicle.images[0].asset.url}
+                    alt={`${vehicle.brand.name} ${vehicle.model.name}`}
+                    width={96}
+                    height={96}
+                    className="w-full h-48 object-cover rounded"
+                  />
                 )}
                 <h3 className="text-lg font-semibold">
                   {vehicle.brand.name} {vehicle.model.name}
