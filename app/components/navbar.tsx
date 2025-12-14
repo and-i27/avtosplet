@@ -29,7 +29,7 @@ const session = await auth();
                             </button>
                         </form>
 
-                        <Link href={`/user/${session?.user?.id}`}>
+                        <Link href={`/profile`}>
                             <span>{session?.user?.name}</span>
                         </Link>
                     </>
