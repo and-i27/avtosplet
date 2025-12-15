@@ -22,6 +22,7 @@ type VehicleTypeDetail = {
   user: {
     _id: string;
     name: string;
+    email: string;
   };
 };
 
@@ -91,24 +92,31 @@ export default async function VehicleDetailPage({ params }: VehiclePageProps) {
         </div>
 
         {/* Right Column */}
-        <div className="space-y-4">
-          {vehicle.description && (
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Description</h2>
-              <p className="text-gray-700">{vehicle.description}</p>
-            </div>
-          )}
+<div className="space-y-4">
+  {vehicle.description && (
+    <div>
+      <h2 className="text-xl font-semibold mb-2">Description</h2>
+      <p className="text-gray-700">{vehicle.description}</p>
+    </div>
+  )}
 
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Seller</h2>
-            <Link
-              href={`/user/${vehicle.user._id}`}
-              className="text-blue-600 hover:underline font-medium"
-            >
-              {vehicle.user.name}
-            </Link>
-          </div>
-        </div>
+  <div>
+    <h2 className="text-xl font-semibold mb-2">Seller</h2>
+    <p className="text-lg">
+      <strong>Name:</strong> {vehicle.user.name}
+    </p>
+    <p className="text-lg">
+      <strong>Email:</strong>{" "}
+      <a
+        href={`mailto:${vehicle.user.email}`}
+        className="text-blue-600 hover:underline"
+      >
+        {vehicle.user.email}
+      </a>
+    </p>
+  </div>
+</div>
+
       </div>
 
       {/* Footer Buttons */}

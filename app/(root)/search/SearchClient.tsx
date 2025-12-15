@@ -17,7 +17,7 @@ type RawVehicle = {
   fuel?: { _id: string; name?: string };
   gearbox?: { _id: string; name?: string };
   images?: { asset: { url: string } }[];
-  user?: { _id: string; name?: string };
+  user?: { _id: string; name?: string; email: string; };
 };
 
 export default function SearchClient() {
@@ -81,7 +81,7 @@ export default function SearchClient() {
   fuel->{_id, name},
   gearbox->{_id, name},
   images[]{asset->{url}},
-  user->{_id, name}
+  user->{_id, name, email}
 }`;
 
 
@@ -93,6 +93,7 @@ export default function SearchClient() {
         user: {
           _id: v.user?._id || "unknown",
           name: v.user?.name || "Unknown",
+          email: v.user?.email || "Unknown"
         },
         brand: v.brand?.name || "N/A",
         model: v.model?.name || "N/A",

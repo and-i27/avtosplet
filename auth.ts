@@ -3,6 +3,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import { client } from "@/sanity/lib/client";
 import bcrypt from "bcryptjs";
+import { writeClient } from "@/sanity/lib/write-client";
+
 
 export const authConfig: NextAuthConfig = {
   providers: [
@@ -60,21 +62,72 @@ export const authConfig: NextAuthConfig = {
   session: { strategy: "jwt" },
 
   callbacks: {
-    async jwt({ token, user, }) {
-  // When a user logs in (both GitHub & Credentials)
-  if (user) {
-    // Always store sanity user fields
-    token.user = {
-      id: user.id, // Sanity ID here
-      name: user.name,
-      email: user.email,
-      providers: user.providers ?? [],
-      emailVerified: user.emailVerified ?? null,
-    };
+    async signIn({ user, account }) {
+    // Samo za GitHub
+    if (account?.provider === "github") {
+      if (!user.email) return false;
+
+      // Ali user že obstaja po emailu?
+      const existingUser = await client.fetch(
+        `*[_type=="user" && email==$email][0]`,
+        { email: user.email }
+      );
+
+      if (existingUser) {
+        // 👉 LINK GITHUB NA OBSTOJEČ PROFIL
+        await writeClient
+          .patch(existingUser._id)
+          .setIfMissing({
+            providers: [],
+          })
+          .append("providers", ["github"])
+          .set({
+            githubId: account.providerAccountId,
+            emailVerified: new Date().toISOString(),
+          })
+          .commit();
+      } else {
+        // 👉 USTVARI NOV USER (GitHub-only)
+        await writeClient.create({
+          _type: "user",
+          name: user.name,
+          email: user.email,
+          githubId: account.providerAccountId,
+          providers: ["github"],
+          emailVerified: new Date().toISOString(),
+        });
+      }
+    }
+
+    return true;
+  },
+    async jwt({ token, user }) {
+  if (user?.email) {
+    const dbUser = await client.fetch(
+      `*[_type=="user" && email==$email][0]{
+        _id,
+        name,
+        email,
+        providers,
+        emailVerified
+      }`,
+      { email: user.email }
+    );
+
+    if (dbUser) {
+      token.user = {
+        id: dbUser._id,
+        name: dbUser.name,
+        email: dbUser.email,
+        providers: dbUser.providers ?? [],
+        emailVerified: dbUser.emailVerified ?? null,
+      };
+    }
   }
 
   return token;
 }
+
 ,
 
     async session({ session, token }) {

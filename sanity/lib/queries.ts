@@ -48,7 +48,7 @@ export const VEHICLE_BY_ID_QUERY = defineQuery(`
     color->{_id, name},
     description,
     images[]{asset->{url}},
-    user->{_id, name},
+    user->{_id, name, email},
     views
   }
 `);
