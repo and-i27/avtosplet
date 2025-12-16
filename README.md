@@ -140,7 +140,6 @@ Postopek:
 
 ## ✅ TODO
 
-* [ ] Napredni filtri (cena, leto, moč)
 * [ ] Dodajanje novih virov podatkov
 * [ ] Izboljšana mobilna izkušnja
 * [ ] SEO optimizacija
