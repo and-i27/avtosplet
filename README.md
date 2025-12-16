@@ -133,7 +133,7 @@ Postopek:
 
 ## ✍️ Avtor
 
-* **Andrej Rezožnik**
+* **Andrej Rezoničnik**
   GitHub: [https://github.com/and-i27](https://github.com/and-i27)
 
 ---
