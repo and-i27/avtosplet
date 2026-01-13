@@ -36,7 +36,10 @@ export default function LoginPage() {
   };
 
   const handleGitHubLogin = () => {
-    signIn("github");
+    signIn("github", {
+      redirect: true,
+      redirectTo: "/",
+    });
   };
 
   return (
