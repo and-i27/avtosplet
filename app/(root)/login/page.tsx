@@ -25,6 +25,7 @@ export default function LoginPage() {
 
       if (!res?.error) {
         router.push("/"); // redirect after successful login
+        router.refresh(); // refresh to update navbar component
       } else {
         alert(res.error || "Invalid email or password");
       }
