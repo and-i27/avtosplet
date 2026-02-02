@@ -7,6 +7,7 @@ import { writeClient } from "@/sanity/lib/write-client";
 
 
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
   providers: [
     CredentialsProvider({
       name: "Credentials",
