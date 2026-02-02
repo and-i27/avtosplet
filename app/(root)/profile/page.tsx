@@ -1,3 +1,5 @@
+// user profile page
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,6 +7,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 
+// Vehicle type definition
 type Vehicle = {
   _id: string;
   brand: { name: string };
@@ -60,6 +63,7 @@ export default function ProfilePage() {
     }
   }
 
+  /* ---------- RENDER content based on session status ---------- */
   if (!session?.user) return <p className="text-center mt-10">You must be logged in.</p>;
   if (loading) return <p className="text-center mt-10">Loading…</p>;
 
@@ -81,10 +85,11 @@ export default function ProfilePage() {
       {/* ---------- USER VEHICLES ---------- */}
       <div>
         <h2 className="text-xl font-bold mb-4">My Vehicles</h2>
-
+        {/* Show message if no vehicles */}
         {vehicles.length === 0 ? (
           <p>You have not added any vehicles yet.</p>
         ) : (
+          // grid vehicle list with edit/delete buttons
           <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {vehicles.map((vehicle) => (
               <li key={vehicle._id} className="border rounded p-4 space-y-2">

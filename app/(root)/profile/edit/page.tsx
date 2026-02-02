@@ -1,3 +1,5 @@
+// edit profile page
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -17,6 +19,7 @@ export default function EditProfilePage() {
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
+  // Fetch user data on mount
   useEffect(() => {
     async function fetchUser() {
       const res = await fetch("/api/user");
@@ -28,19 +31,23 @@ export default function EditProfilePage() {
       setLoading(false);
     }
 
+    // Only fetch if authenticated
     if (status === "authenticated") fetchUser();
   }, [status]);
 
+  // Handle saved changes
   const handleSave = async () => {
     setSaving(true);
     setError("");
 
     const body: Record<string, string> = { name };
 
+    // Only include changed email
     if (email && email !== session?.user?.email) {
       body.email = email;
     }
 
+    // Check if password change is requested
     if (newPassword) {
       if (!oldPassword) {
         setError("Za spremembo gesla vnesite staro geslo.");
@@ -52,6 +59,7 @@ export default function EditProfilePage() {
     }
 
     try {
+      // send updated user data to the API
       const res = await fetch("/api/user", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -59,19 +67,23 @@ export default function EditProfilePage() {
       });
       const data = await res.json();
 
+      // handle response
       if (!res.ok) {
         setError(data.error ?? "Napaka pri shranjevanju.");
       } else {
         router.push("/profile");
       }
     } catch (err) {
+      // handle unexpected errors
       console.error(err);
       setError("Napaka pri shranjevanju.");
     } finally {
+      // stop saving state
       setSaving(false);
     }
   };
 
+  // Render loading, unauthenticated, or form based on session status
   if (status === "loading" || loading) {
     return <p className="text-center mt-10">Loading…</p>;
   }
@@ -85,7 +97,7 @@ export default function EditProfilePage() {
   return (
     <div className="max-w-xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold">Uredi profil</h1>
-
+      {/* show error if any */}
       {error && <p className="text-red-600">{error}</p>}
 
       {/* Name */}
@@ -127,7 +139,7 @@ export default function EditProfilePage() {
         />
       </div>
 
-      {/* GitHub */}
+      {/* Connect GitHub */}
       <div className="border rounded p-4">
         <h2 className="font-semibold mb-2">GitHub</h2>
         {githubLinked ? (

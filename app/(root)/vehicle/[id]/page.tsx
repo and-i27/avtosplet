@@ -1,9 +1,12 @@
+// vehicle details page
+
 import { client } from "@/sanity/lib/client";
 import { VEHICLE_BY_ID_QUERY } from "@/sanity/lib/queries";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+// Vehicle type definition
 type VehicleTypeDetail = {
   _id: string;
   brand?: { _id: string; name?: string };
@@ -26,22 +29,27 @@ type VehicleTypeDetail = {
   };
 };
 
+// vehicle page props type
 type VehiclePageProps = {
   params: Promise<{ id: string }>;
 };
 
 export default async function VehicleDetailPage({ params }: VehiclePageProps) {
+  // Extract vehicle ID from params
   const { id } = await params;
 
+  // If no ID, show not found message
   if (!id) {
     return <p className="text-gray-500">Vozilo ni najdeno.</p>;
   }
 
+  // Fetch vehicle details from Sanity
   const vehicle = await client.fetch<VehicleTypeDetail | null>(
     VEHICLE_BY_ID_QUERY,
     { id }
   );
 
+  // If vehicle not found, show message
   if (!vehicle) {
     return <p className="text-gray-500">Vozilo ni najdeno.</p>;
   }
@@ -92,31 +100,30 @@ export default async function VehicleDetailPage({ params }: VehiclePageProps) {
         </div>
 
         {/* Right Column */}
-<div className="space-y-4">
-  {vehicle.description && (
-    <div>
-      <h2 className="text-xl font-semibold mb-2">Description</h2>
-      <p className="text-gray-700">{vehicle.description}</p>
-    </div>
-  )}
+        <div className="space-y-4">
+          {vehicle.description && (
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Description</h2>
+              <p className="text-gray-700">{vehicle.description}</p>
+            </div>
+          )}
 
-  <div>
-    <h2 className="text-xl font-semibold mb-2">Seller</h2>
-    <p className="text-lg">
-      <strong>Name:</strong> {vehicle.user.name}
-    </p>
-    <p className="text-lg">
-      <strong>Email:</strong>{" "}
-      <a
-        href={`mailto:${vehicle.user.email}`}
-        className="text-blue-600 hover:underline"
-      >
-        {vehicle.user.email}
-      </a>
-    </p>
-  </div>
-</div>
-
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Seller</h2>
+            <p className="text-lg">
+              <strong>Name:</strong> {vehicle.user.name}
+            </p>
+            <p className="text-lg">
+              <strong>Email:</strong>{" "}
+              <a
+                href={`mailto:${vehicle.user.email}`}
+                className="text-blue-600 hover:underline"
+              >
+                {vehicle.user.email}
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Footer Buttons */}
