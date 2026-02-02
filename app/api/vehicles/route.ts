@@ -1,10 +1,13 @@
+// route handler for creating a new vehicle
+
 import { writeClient } from "@/sanity/lib/write-client";
 import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 
-
+// Create a new vehicle with POST
 export async function POST(req: NextRequest) {
   try {
+    // Parse form data
     const formData = await req.formData();
 
     const brand = formData.get("brand") as string;
@@ -14,6 +17,7 @@ export async function POST(req: NextRequest) {
     const color = formData.get("color") as string | null;
     const userId = formData.get("userId") as string;
 
+    // Return error if userId is missing
     if (!userId) {
       return NextResponse.json({ error: "User ID is required" }, { status: 400 });
     }
@@ -31,25 +35,26 @@ export async function POST(req: NextRequest) {
 
     // 🖼️ upload images
     // 🖼️ upload images
-const imageFiles = formData.getAll("images") as File[];
-const imageRefs: any[] = [];
+    const imageFiles = formData.getAll("images") as File[];
+    const imageRefs: any[] = [];
 
-for (const file of imageFiles) {
-  const asset = await writeClient.assets.upload("image", file, {
-    filename: file.name,
-  });
+    // Upload each image and create reference
+    for (const file of imageFiles) {
+      const asset = await writeClient.assets.upload("image", file, {
+        filename: file.name,
+      });
 
-  imageRefs.push({
-    _key: nanoid(),                    // ✅ OBVEZNO
-    _type: "image",
-    asset: {
-      _type: "reference",
-      _ref: asset._id,
-    },
-  });
-}
+      imageRefs.push({
+        _key: nanoid(),                    // ✅ OBVEZNO
+        _type: "image",
+        asset: {
+          _type: "reference",
+          _ref: asset._id,
+        },
+      });
+    }
 
-
+    // Create vehicle document
     const vehicleDoc = {
       _type: "vehicle",
       brand: { _type: "reference", _ref: brand },
@@ -72,10 +77,12 @@ for (const file of imageFiles) {
       user: { _type: "reference", _ref: userId },
     };
 
+    // Save vehicle to Sanity
     const created = await writeClient.create(vehicleDoc);
     return NextResponse.json(created, { status: 201 });
 
   } catch (err) {
+    // Log and return error on failure
     console.error(err);
     return NextResponse.json({ error: "Failed to create vehicle" }, { status: 500 });
   }

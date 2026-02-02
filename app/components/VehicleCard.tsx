@@ -1,8 +1,10 @@
-import React from "react";
+// vehicle card (card on search page) component
+
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
+// Define the type for vehicle props
 export type VehicleTypeCard = {
   _id: string;
   views: number;
@@ -35,14 +37,12 @@ const VehicleCard = ({ post }: { post: VehicleTypeCard }) => {
     _id,
   } = post;
 
+  // Determine main image or use placeholder
   const mainImage = images && images.length > 0 ? images[0].asset.url : "/placeholder.png";
 
   return (
     <li className="vehicle-card border rounded-lg p-4 shadow-sm bg-white  transition-transform transform hover:scale-105">
-      {/* Header: Views */}
-      
-
-      {/* Author + Title */}
+      {/* Author of the ad + vehicle */}
       <div className="flex justify-between items-center mb-2">
         <div>
           <Link href={`/user/${authorId}`}>

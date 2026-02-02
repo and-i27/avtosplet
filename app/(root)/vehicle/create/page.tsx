@@ -1,3 +1,5 @@
+// make a new vehicle ad page
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -5,9 +7,10 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 
-
+// Option type definition (form select options)
 type Option = { _id: string; name: string };
 
+// Vehicle form state type (for managing form inputs)
 type VehicleFormState = {
   brand: string;
   model: string;
@@ -66,10 +69,13 @@ export default function AddVehiclePage() {
     gearboxes: [],
   });
 
+  // Fetch initial options for selects
   useEffect(() => {
     async function fetchOptions() {
       const res = await fetch("/api/vehicles/options");
       const data = await res.json();
+
+      // Set fetched options to state
       setOptions({
         brands: data.brands,
         colors: data.colors,
@@ -81,6 +87,7 @@ export default function AddVehiclePage() {
     fetchOptions();
   }, []);
 
+  // Fetch models when brand changes
   useEffect(() => {
     async function fetchModels() {
       if (!form.brand) return;
@@ -91,6 +98,7 @@ export default function AddVehiclePage() {
     fetchModels();
   }, [form.brand]);
 
+  // Handle input changes
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) {
@@ -98,18 +106,22 @@ export default function AddVehiclePage() {
     setForm(prev => ({ ...prev, [name]: value }));
   }
 
+  // Handle file input changes
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-  const files = e.target.files;
-  if (!files) return;
-  setForm(prev => ({ ...prev, images: Array.from(files) }));
-}
+    const files = e.target.files;
+    if (!files) return;
+    setForm(prev => ({ ...prev, images: Array.from(files) }));
+  }
 
 
+  // Handle form submission
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!session?.user?.id) return alert("You must be logged in");
 
     const fd = new FormData();
+
+    // Append all form fields except images
     Object.entries(form).forEach(([key, value]) => {
       if (key === "images") return;
       fd.append(key, value as string);
@@ -117,18 +129,20 @@ export default function AddVehiclePage() {
     fd.append("userId", session.user.id);
     form.images.forEach(img => fd.append("images", img));
 
+    // Send POST request to create vehicle
     const res = await fetch("/api/vehicles", { method: "POST", body: fd });
     if (!res.ok) return alert("Error adding vehicle");
 
     router.push("/");
   }
 
+  // Remove image from form state
   function removeImage(index: number) {
-  setForm(prev => ({
-    ...prev,
-    images: prev.images.filter((_, i) => i !== index),
-  }));
-}
+    setForm(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+  }
 
 
   return (
@@ -216,59 +230,59 @@ export default function AddVehiclePage() {
 
           {/* IMAGES */}
           <div className="space-y-2">
-  <label className="block text-sm font-medium">Images</label>
+            <label className="block text-sm font-medium">Images</label>
 
-  {/* skriti input */}
-  <input
-    id="images"
-    type="file"
-    multiple
-    accept="image/*"
-    onChange={handleFileChange}
-    className="hidden"
-  />
+            {/* skriti input */}
+            <input
+              id="images"
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
 
-  {/* fake button */}
-  <label
-    htmlFor="images"
-    className="
-      inline-flex items-center justify-center
-      cursor-pointer
-      border border-dashed border-gray-400
-      rounded-lg
-      px-4 py-3
-      text-sm font-medium
-      text-gray-700
-      hover:border-blue-500
-      hover:text-blue-600
-      transition
-    "
-  >
-    📁 Izberi slike
-  </label>
+            {/* fake button */}
+            <label
+              htmlFor="images"
+              className="
+                inline-flex items-center justify-center
+                cursor-pointer
+                border border-dashed border-gray-400
+                rounded-lg
+                px-4 py-3
+                text-sm font-medium
+                text-gray-700
+                hover:border-blue-500
+                hover:text-blue-600
+                transition
+              "
+            >
+              📁 Izberi slike
+            </label>
 
+            {/* image previews */}
+            {form.images.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3">
+                {form.images.map((file, index) => (
+                  <div
+                    key={index}
+                    className="relative group rounded-lg overflow-hidden border"
+                  >
 
-  {form.images.length > 0 && (
-    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3">
-      {form.images.map((file, index) => (
-        <div
-          key={index}
-          className="relative group rounded-lg overflow-hidden border"
-        >
-
-<Image src={URL.createObjectURL(file)} alt={`Preview ${index}`} width={96} height={96} className="h-24 w-full object-cover" />
-          <button
-            type="button"
-            onClick={() => removeImage(index)}
-            className="absolute top-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
-          >
-            ✕
-          </button>
-        </div>
-      ))}
-    </div>
-  )}
-</div>
+                    <Image src={URL.createObjectURL(file)} alt={`Preview ${index}`} width={96} height={96} className="h-24 w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
 
           {/* SUBMIT */}

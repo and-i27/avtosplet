@@ -1,5 +1,8 @@
+// Script for seeding colors into the Sanity database
+
 import { writeClient } from "@/sanity/lib/write-client";
 
+// Normalize string to create ID
 function normalize(input: string) {
   return input
     .toLowerCase()
@@ -9,6 +12,7 @@ function normalize(input: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+// Define the structure of a color to be seeded
 type ColorSeed = {
   name: string;
   description?: string;
@@ -37,10 +41,13 @@ const colors: ColorSeed[] = [
   { name: "Saten Črna", description: "Satenasti črn zaključek z mehkim leskom." },
 ];
 
+// Seed colors into the database with GET
 export async function GET() {
   try {
+    // Array to hold results
     const results = [];
 
+    // Iterate over each color and create if not exists
     for (const color of colors) {
       const id = `color-${normalize(color.name)}`;
 
@@ -53,11 +60,13 @@ export async function GET() {
       results.push(created);
     }
 
+    // Return success response with count of seeded colors
     return Response.json({
       message: "Colors seeded successfully",
       count: results.length,
     });
   } catch (error) {
+    // Log and return error on failure
     console.error("COLOR SEED ERROR:", error);
     return Response.json(
       { error: "Color seed failed", details: String(error) },

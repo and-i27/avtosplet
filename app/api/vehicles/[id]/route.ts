@@ -1,3 +1,5 @@
+// route handler for vehicle retrieval, update, and deletion
+
 import { client } from "@/sanity/lib/client";
 import { writeClient } from "@/sanity/lib/write-client";
 import { NextRequest, NextResponse } from "next/server";
@@ -7,16 +9,18 @@ import { NextRequest, NextResponse } from "next/server";
 ===================================================== */
 export async function GET(
   _: NextRequest,
-  context: { params: Promise<{ id: string }> } // params je Promise
+  context: { params: Promise<{ id: string }> } // params is a Promise
 ) {
   try {
     const params = await context.params; // 👈 unwrap Promise
     const { id } = params;
 
+    // Validate ID
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
+    // Fetch vehicle data from Sanity
     const vehicle = await client.fetch(
       `*[_type=="vehicle" && _id==$id][0]{
         brand->{_id, name},
@@ -37,12 +41,14 @@ export async function GET(
       { id }
     );
 
+    // If vehicle not found, return 404
     if (!vehicle) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     return NextResponse.json(vehicle);
   } catch (err) {
+    // Log and return error on failure
     console.error("GET vehicle error:", err);
     return NextResponse.json({ error: "Failed to fetch vehicle" }, { status: 500 });
   }
@@ -56,13 +62,16 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Extract ID from params
     const params = await context.params;
     const { id } = params;
 
+    // Validate ID
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
+    // Parse form data
     const formData = await req.formData();
 
     const brand = formData.get("brand") as string;
@@ -88,11 +97,13 @@ export async function PUT(
     const newFiles = formData.getAll("images") as File[];
     const newImageRefs = [];
 
+    // Upload new images and create references
     for (const file of newFiles) {
       const asset = await writeClient.assets.upload("image", file, {
         filename: file.name,
       });
 
+      // Create image reference
       newImageRefs.push({
         _type: "image",
         _key: crypto.randomUUID(),
@@ -110,7 +121,7 @@ export async function PUT(
       ...newImageRefs,
     ];
 
-    /* ---------- PATCH VEHICLE ---------- */
+    // Update vehicle in Sanity
     await writeClient
       .patch(id)
       .set({
@@ -134,6 +145,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true });
   } catch (err) {
+    // Log and return error on failure
     console.error("PUT vehicle error:", err);
     return NextResponse.json({ error: "Failed to update vehicle" }, { status: 500 });
   }
@@ -147,18 +159,21 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Extract ID from params
     const params = await context.params;
     const { id } = params;
 
+    // Validate ID
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    // Delete vozilo
+    // Delete vehicle
     await writeClient.delete(id);
 
     return NextResponse.json({ success: true });
   } catch (err) {
+    // Log and return error on failure
     console.error("DELETE vehicle error:", err);
     return NextResponse.json({ error: "Failed to delete vehicle" }, { status: 500 });
   }

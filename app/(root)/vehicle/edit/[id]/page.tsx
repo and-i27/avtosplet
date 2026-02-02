@@ -1,12 +1,18 @@
+// edit vehicle ad page
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 
+// Option type definition (form select options)
 type Option = { _id: string; name: string };
+
+// Existing image type definition (for images already uploaded)
 type ExistingImage = { _key: string; _ref: string; url: string };
 
+// Vehicle form state type (for managing form inputs)
 type VehicleFormState = {
   brand: string;
   model: string;
@@ -46,11 +52,13 @@ export default function EditVehiclePage() {
     brands: Option[]; models: Option[]; colors: Option[]; fuels: Option[]; gearboxes: Option[];
   }>({ brands: [], models: [], colors: [], fuels: [], gearboxes: [] });
 
-  // ---------- LOAD OPTIONS ----------
+  // Fetch initial options for selects
   useEffect(() => {
     async function loadOptions() {
       const res = await fetch("/api/vehicles/options");
       const data = await res.json();
+
+      // Set options for selects
       setOptions({
         brands: data.brands ?? [], models: [], colors: data.colors ?? [], fuels: data.fuels ?? [], gearboxes: data.gearboxes ?? []
       });
@@ -58,14 +66,17 @@ export default function EditVehiclePage() {
     loadOptions();
   }, []);
 
-  // ---------- LOAD VEHICLE ----------
+  // Fetch vehicle data for editing
   useEffect(() => {
     async function loadVehicle() {
+      // Ensure id is available
       if (!id) return;
       const res = await fetch(`/api/vehicles/${id}`);
+      // Check if fetch was successful
       if (!res.ok) return;
       const v = await res.json();
 
+      // Populate form with existing vehicle data
       setForm({
         brand: v.brand?._id ?? "",
         model: v.model?._id ?? "",
@@ -92,21 +103,26 @@ export default function EditVehiclePage() {
     loadVehicle();
   }, [id]);
 
-  // ---------- LOAD MODELS ----------
+  // Fetch models when brand changes
   useEffect(() => {
+    // Load models for selected brand
     async function loadModels() {
       if (!form.brand) {
         setOptions(prev => ({ ...prev, models: [] }));
         return;
       }
+
+      // Fetch models based on selected brand
       const res = await fetch(`/api/vehicles/models?brand=${form.brand}`);
       const data = await res.json();
+
+      // Update models in options state
       setOptions(prev => ({ ...prev, models: data.models ?? [] }));
     }
     loadModels();
   }, [form.brand]);
 
-  // ---------- HANDLERS ----------
+  // Handle input changes
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) {
@@ -114,13 +130,14 @@ export default function EditVehiclePage() {
     setForm(prev => ({ ...prev, [name]: value }));
   }
 
+  // Handle file input changes
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-  const files = e.target.files;
-  if (!files) return;
-  setForm(prev => ({ ...prev, images: Array.from(files) }));
-}
+    const files = e.target.files;
+    if (!files) return;
+    setForm(prev => ({ ...prev, images: Array.from(files) }));
+  }
 
-
+  // Remove selected new image
   function removeImage(index: number) {
     setForm(prev => ({
       ...prev,
@@ -128,6 +145,7 @@ export default function EditVehiclePage() {
     }));
   }
 
+  // Remove selected existing image
   function removeExistingImage(key: string) {
     setForm(prev => ({
       ...prev,
@@ -135,21 +153,30 @@ export default function EditVehiclePage() {
     }));
   }
 
+  // Handle form submission
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const fd = new FormData();
 
+    // Append all form fields except images
     ["brand","model","fuel","gearbox","color","price","year","kilometers","engineSize","powerKW","doors","seats","description"]
       .forEach(f => fd.append(f, (form as any)[f]));
 
+    // Append existing images info
     fd.append("existingImages", JSON.stringify(form.existingImages.map(img => ({ _key: img._key, _ref: img._ref }))));
+
+    // Append new images
     form.images.forEach(img => fd.append("images", img));
 
+    // Send PUT request to update vehicle
     const res = await fetch(`/api/vehicles/${id}`, { method: "PUT", body: fd });
+
+    // Check response and navigate accordingly
     if (res.ok) router.push("/profile");
     else alert("Error updating vehicle");
   }
 
+  // Show loading state if data is still being fetched
   if (loading) return <p className="text-center mt-10">Loading…</p>;
 
   return (
@@ -159,75 +186,75 @@ export default function EditVehiclePage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* SELECTS */}
+          {/* SELECT INPUTS */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
-    Brand
-  </label>
+              Brand
+            </label>
             <select name="brand" value={form.brand} onChange={handleChange} className={inputClass}>
               <option value="">Brand</option>
               {options.brands.map(b => <option key={b._id} value={b._id}>{b.name}</option>)}
             </select>
 
             <label htmlFor="model" className="block text-sm font-medium text-gray-700">
-    Model
-  </label>
+              Model
+            </label>
             <select name="model" value={form.model} onChange={handleChange} disabled={!form.brand} className={inputClass}>
               <option value="">Model</option>
               {options.models.map(m => <option key={m._id} value={m._id}>{m.name}</option>)}
             </select>
 
-<label htmlFor="fuel" className="block text-sm font-medium text-gray-700">
-    Fuel
-  </label>
+            <label htmlFor="fuel" className="block text-sm font-medium text-gray-700">
+              Fuel
+            </label>
             <select name="fuel" value={form.fuel} onChange={handleChange} className={inputClass}>
               <option value="">Fuel</option>
               {options.fuels.map(f => <option key={f._id} value={f._id}>{f.name}</option>)}
             </select>
 
-<label htmlFor="gearbox" className="block text-sm font-medium text-gray-700">
-    Gearbox
-  </label>
+            <label htmlFor="gearbox" className="block text-sm font-medium text-gray-700">
+              Gearbox
+            </label>
             <select name="gearbox" value={form.gearbox} onChange={handleChange} className={inputClass}>
               <option value="">Gearbox</option>
               {options.gearboxes.map(g => <option key={g._id} value={g._id}>{g.name}</option>)}
             </select>
 
-<label htmlFor="color" className="block text-sm font-medium text-gray-700">
-    Color
-  </label>
+            <label htmlFor="color" className="block text-sm font-medium text-gray-700">
+              Color
+            </label>
             <select name="color" value={form.color} onChange={handleChange} className={inputClass}>
               <option value="">Color</option>
               {options.colors.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
             </select>
           </div>
 
-          {/* NUMBERS */}
+          {/* NUMBER INPUTS */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-    Price (€)
-  </label>
+              Price (€)
+            </label>
             <input type="number" name="price" value={form.price} placeholder="Price (€)" onChange={handleChange} className={inputClass} />
             <label htmlFor="year" className="block text-sm font-medium text-gray-700">
-    Year
-  </label>
+              Year
+            </label>
             <input type="number" name="year" value={form.year} placeholder="Year" onChange={handleChange} className={inputClass} />
             <label htmlFor="kilometers" className="block text-sm font-medium text-gray-700">
-    Kilometers
-  </label>
+              Kilometers
+            </label>
             <input type="number" name="kilometers" value={form.kilometers} placeholder="Kilometers" onChange={handleChange} className={inputClass} />
             <label htmlFor="engineSize" className="block text-sm font-medium text-gray-700">
-    EngineSize
-  </label>
+              Engine Size
+            </label>
             <input type="number" name="engineSize" value={form.engineSize} placeholder="Engine size (ccm)" onChange={handleChange} className={inputClass} />
             <label htmlFor="powerKW" className="block text-sm font-medium text-gray-700">
-    Power
-  </label>
+              Power
+            </label>
             <input type="number" name="powerKW" value={form.powerKW} placeholder="Power (kW)" onChange={handleChange} className={inputClass} />
 
-<label htmlFor="doors" className="block text-sm font-medium text-gray-700">
-    Doors
-  </label>
+            <label htmlFor="doors" className="block text-sm font-medium text-gray-700">
+              Doors
+            </label>
             <select name="doors" value={form.doors} onChange={handleChange} className={inputClass}>
               <option value="">Doors</option>
               <option value="2">2 / 3</option>
@@ -235,9 +262,9 @@ export default function EditVehiclePage() {
               <option value="6">6 / 7</option>
             </select>
 
-<label htmlFor="seats" className="block text-sm font-medium text-gray-700">
-    Seats
-  </label>
+            <label htmlFor="seats" className="block text-sm font-medium text-gray-700">
+              Seats
+            </label>
             <select name="seats" value={form.seats} onChange={handleChange} className={inputClass}>
               <option value="">Seats</option>
               <option value="2">2</option>
@@ -248,8 +275,8 @@ export default function EditVehiclePage() {
 
           {/* DESCRIPTION */}
           <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-    Vehicle description
-  </label>
+            Vehicle description
+          </label>
           <textarea name="description" value={form.description} onChange={handleChange} placeholder="Vehicle description" rows={4} className={inputClass} />
 
           {/* EXISTING IMAGES */}
@@ -286,6 +313,7 @@ export default function EditVehiclePage() {
             )}
           </div>
 
+          {/* FORM ACTIONS */}
           <div className="flex space-x-4">
             {/* CANCEL */}
             <button onClick={() => router.back()} className="w-1/2 px-6 py-3 font-semibold border rounded">
