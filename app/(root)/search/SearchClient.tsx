@@ -1,3 +1,5 @@
+// client component for rendering search results
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -5,6 +7,7 @@ import { client } from "@/sanity/lib/client";
 import { useSearchParams } from "next/navigation";
 import VehicleCard, { VehicleTypeCard } from "@/app/components/VehicleCard";
 
+// Raw vehicle type from Sanity
 type RawVehicle = {
   _id: string;
   views?: number;
@@ -24,69 +27,72 @@ export default function SearchClient() {
   const searchParams = useSearchParams();
   const [vehicles, setVehicles] = useState<VehicleTypeCard[]>([]);
 
+  // Memoize search parameters
   const params = useMemo(() => ({
-  brand: searchParams.get("brand") || "",
-  model: searchParams.get("model") || "",
-  fuel: searchParams.get("fuel") || "",
-  gearbox: searchParams.get("gearbox") || "",
-  color: searchParams.get("color") || "",
-  minPrice: searchParams.get("minPrice") || "",
-  maxPrice: searchParams.get("maxPrice") || "",
-  minYear: searchParams.get("minYear") || "",
-  maxYear: searchParams.get("maxYear") || "",
-  minKm: searchParams.get("minKm") || "",
-  maxKm: searchParams.get("maxKm") || "",
-  minKw: searchParams.get("minKw") || "",
-  maxKw: searchParams.get("maxKw") || "",
-  minCcm: searchParams.get("minCcm") || "",
-  maxCcm: searchParams.get("maxCcm") || "",
-  doors: searchParams.get("doors") || "",
-  seats: searchParams.get("seats") || "",
-}), [searchParams]);
+    brand: searchParams.get("brand") || "",
+    model: searchParams.get("model") || "",
+    fuel: searchParams.get("fuel") || "",
+    gearbox: searchParams.get("gearbox") || "",
+    color: searchParams.get("color") || "",
+    minPrice: searchParams.get("minPrice") || "",
+    maxPrice: searchParams.get("maxPrice") || "",
+    minYear: searchParams.get("minYear") || "",
+    maxYear: searchParams.get("maxYear") || "",
+    minKm: searchParams.get("minKm") || "",
+    maxKm: searchParams.get("maxKm") || "",
+    minKw: searchParams.get("minKw") || "",
+    maxKw: searchParams.get("maxKw") || "",
+    minCcm: searchParams.get("minCcm") || "",
+    maxCcm: searchParams.get("maxCcm") || "",
+    doors: searchParams.get("doors") || "",
+    seats: searchParams.get("seats") || "",
+  }), [searchParams]);
 
-
+  // Fetch vehicles when search parameters change
   useEffect(() => {
     async function fetchVehicles() {
+      // Build GROQ query with filters
       const query = `*[_type == "vehicle"
-  ${params.brand ? `&& brand._ref == "${params.brand}"` : ""}
-  ${params.model ? `&& model._ref == "${params.model}"` : ""}
-  ${params.fuel ? `&& fuel._ref == "${params.fuel}"` : ""}
-  ${params.gearbox ? `&& gearbox._ref == "${params.gearbox}"` : ""}
-  ${params.color ? `&& color._ref == "${params.color}"` : ""}
-  ${params.minPrice ? `&& price >= ${params.minPrice}` : ""}
-  ${params.maxPrice ? `&& price <= ${params.maxPrice}` : ""}
-  ${params.minYear ? `&& year >= ${params.minYear}` : ""}
-  ${params.maxYear ? `&& year <= ${params.maxYear}` : ""}
-  ${params.minKm ? `&& kilometers >= ${params.minKm}` : ""}
-  ${params.maxKm ? `&& kilometers <= ${params.maxKm}` : ""}
-  ${params.minKw ? `&& powerKW >= ${params.minKw}` : ""}
-  ${params.maxKw ? `&& powerKW <= ${params.maxKw}` : ""}
-  ${params.minCcm ? `&& engineSize >= ${params.minCcm}` : ""}
-  ${params.maxCcm ? `&& engineSize <= ${params.maxCcm}` : ""}
-  ${params.doors ? `&& doors == ${params.doors}` : ""}
-  ${params.seats ? `&& seats == ${params.seats}` : ""}
-]{
-  _id,
-  views,
-  price,
-  year,
-  kilometers,
-  engineSize,
-  powerKW,
-  doors,
-  seats,
-  brand->{_id, name},
-  model->{_id, name},
-  color->{_id, name},
-  fuel->{_id, name},
-  gearbox->{_id, name},
-  images[]{asset->{url}},
-  user->{_id, name, email}
-}`;
+        ${params.brand ? `&& brand._ref == "${params.brand}"` : ""}
+        ${params.model ? `&& model._ref == "${params.model}"` : ""}
+        ${params.fuel ? `&& fuel._ref == "${params.fuel}"` : ""}
+        ${params.gearbox ? `&& gearbox._ref == "${params.gearbox}"` : ""}
+        ${params.color ? `&& color._ref == "${params.color}"` : ""}
+        ${params.minPrice ? `&& price >= ${params.minPrice}` : ""}
+        ${params.maxPrice ? `&& price <= ${params.maxPrice}` : ""}
+        ${params.minYear ? `&& year >= ${params.minYear}` : ""}
+        ${params.maxYear ? `&& year <= ${params.maxYear}` : ""}
+        ${params.minKm ? `&& kilometers >= ${params.minKm}` : ""}
+        ${params.maxKm ? `&& kilometers <= ${params.maxKm}` : ""}
+        ${params.minKw ? `&& powerKW >= ${params.minKw}` : ""}
+        ${params.maxKw ? `&& powerKW <= ${params.maxKw}` : ""}
+        ${params.minCcm ? `&& engineSize >= ${params.minCcm}` : ""}
+        ${params.maxCcm ? `&& engineSize <= ${params.maxCcm}` : ""}
+        ${params.doors ? `&& doors == ${params.doors}` : ""}
+        ${params.seats ? `&& seats == ${params.seats}` : ""}
+        ]{
+          _id,
+          views,
+          price,
+          year,
+          kilometers,
+          engineSize,
+          powerKW,
+          doors,
+          seats,
+          brand->{_id, name},
+          model->{_id, name},
+          color->{_id, name},
+          fuel->{_id, name},
+          gearbox->{_id, name},
+          images[]{asset->{url}},
+          user->{_id, name, email}
+      }`;
 
-
+      // Fetch data from Sanity
       const results: RawVehicle[] = await client.fetch(query);
 
+      // Map raw data to VehicleTypeCard
       const mapped: VehicleTypeCard[] = results.map(v => ({
         _id: v._id,
         views: v.views || 0,
@@ -113,6 +119,7 @@ export default function SearchClient() {
 
   return (
     <div>
+      {/* Show results based on search: */}
       {vehicles.length === 0 ? (
         <p>Ni rezultatov.</p>
       ) : (

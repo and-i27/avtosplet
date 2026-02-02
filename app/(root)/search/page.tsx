@@ -1,3 +1,5 @@
+// search page - server component with suspense for client component
+
 import { Suspense } from "react";
 import SearchClient from "./SearchClient"; // skelet za fallback
 import Link from 'next/link'

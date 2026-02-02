@@ -1,4 +1,4 @@
-// app/components/HomePage.tsx
+// client component for home page
 'use client'
 
 import VehicleFilter from '@/app/components/VehicleFilter'

@@ -1,3 +1,5 @@
+// next-auth server action for GitHub login
+
 "use server";
 
 import { signIn } from "next-auth/react";

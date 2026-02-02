@@ -1,11 +1,16 @@
+// register route handler
+
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { writeClient } from "@/sanity/lib/write-client";
 
 export async function POST(req: NextRequest) {
   try {
+
+    // Parse request body
     const { name, email, password } = await req.json();
 
+    // Check for missing fields
     if (!name || !email || !password) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
@@ -38,6 +43,7 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    // In case of unexpected errors, log and return an error message
     console.error("Register error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
