@@ -146,7 +146,7 @@ export default function EditVehiclePage() {
     form.images.forEach(img => fd.append("images", img));
 
     const res = await fetch(`/api/vehicles/${id}`, { method: "PUT", body: fd });
-    if (res.ok) router.push("/vehicle/my-vehicles");
+    if (res.ok) router.push("/profile");
     else alert("Error updating vehicle");
   }
 
@@ -286,11 +286,17 @@ export default function EditVehiclePage() {
             )}
           </div>
 
-          {/* SUBMIT */}
-          <button type="submit" className="w-full rounded-lg bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 transition">
-            Save changes
-          </button>
+          <div className="flex space-x-4">
+            {/* CANCEL */}
+            <button onClick={() => router.back()} className="w-1/2 px-6 py-3 font-semibold border rounded">
+              Prekliči
+            </button>
 
+            {/* SUBMIT */}
+            <button type="submit" className="w-1/2 rounded-lg bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 transition">
+              Save changes
+            </button>
+          </div>
         </form>
       </div>
     </div>
