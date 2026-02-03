@@ -1,16 +1,15 @@
 name: Cypress E2E
 
 on:
-  push:
   pull_request:
 
 jobs:
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
         NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_SANITY_PROJECT_ID }}
         NEXT_PUBLIC_SANITY_DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_DATASET }}
-        AUTH_SECRET=: ${{ secrets.AUTH_SECRET }}
+        AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
 
         AUTH_GITHUB_ID: ${{ secrets.AUTH_GITHUB_ID }}
         AUTH_GITHUB_SECRET: ${{ secrets.AUTH_GITHUB_SECRET }}
