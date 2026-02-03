@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "cypress:open": "cypress open",
-    "test:e2e": "cypress run"
+    "test:e2e": "cypress run",
+    "test:component": "cypress run --component"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
