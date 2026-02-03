@@ -4,7 +4,7 @@ on:
   pull_request:
 
 jobs:
-  e2e:
+  Cypress tests:
     runs-on: ubuntu-22.04
     env:
         NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_SANITY_PROJECT_ID }}
@@ -38,7 +38,7 @@ jobs:
       - name: Wait for app
         run: npx wait-on http://localhost:3000
 
-      - name: Run Cypress
+      - name: Run Cypress E2E tests
         run: npm run test:e2e
 
       - name: Run Cypress Component tests
