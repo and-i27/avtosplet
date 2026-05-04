@@ -20,6 +20,12 @@ const navbar = async () => {
                                 <span>Create</span>
                             </Link>
 
+                            {session.user.role === "admin" && (
+                                <Link href="/admin">
+                                    <span>Admin</span>
+                                </Link>
+                            )}
+
                             <form action={async() => {
                                 "use server"
 

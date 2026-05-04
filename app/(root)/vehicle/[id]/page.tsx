@@ -2,9 +2,10 @@
 
 import { client } from "@/sanity/lib/client";
 import { VEHICLE_BY_ID_QUERY } from "@/sanity/lib/queries";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import VehicleGallery from "@/app/components/VehicleGallery";
+import VehicleContactForm from "@/app/components/VehicleContactForm";
 
 // Vehicle type definition
 type VehicleTypeDetail = {
@@ -25,7 +26,6 @@ type VehicleTypeDetail = {
   user: {
     _id: string;
     name: string;
-    email: string;
   };
 };
 
@@ -54,36 +54,17 @@ export default async function VehicleDetailPage({ params }: VehiclePageProps) {
     return <p className="text-gray-500">Vozilo ni najdeno.</p>;
   }
 
+  const galleryImages = vehicle.images?.map((image) => image.asset.url) ?? [];
+  const vehicleTitle = `${vehicle.brand?.name || "N/A"} ${vehicle.model?.name || "N/A"}`;
+
   return (
     <div className="max-w-6xl mx-auto p-4 space-y-6">
       {/* Title */}
       <h1 className="text-3xl font-bold">
-        {vehicle.brand?.name || "N/A"} {vehicle.model?.name || "N/A"}
+        {vehicleTitle}
       </h1>
 
-      {/* Images slider */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {vehicle.images && vehicle.images.length > 0 ? (
-          vehicle.images.map((img, index) => (
-            <Image
-              key={index}
-              src={img.asset.url}
-              alt={`${vehicle.brand?.name || ""} ${vehicle.model?.name || ""} image ${index + 1}`}
-              width={600}
-              height={400}
-              className="rounded-xl object-cover w-full h-64 md:h-80"
-            />
-          ))
-        ) : (
-          <Image
-            src="/placeholder.png"
-            alt="placeholder"
-            width={600}
-            height={400}
-            className="rounded-xl object-cover w-full h-64 md:h-80"
-          />
-        )}
-      </div>
+      <VehicleGallery images={galleryImages} alt={vehicleTitle} />
 
       {/* Vehicle Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -113,16 +94,13 @@ export default async function VehicleDetailPage({ params }: VehiclePageProps) {
             <p className="text-lg">
               <strong>Name:</strong> {vehicle.user.name}
             </p>
-            <p className="text-lg">
-              <strong>Email:</strong>{" "}
-              <a
-                href={`mailto:${vehicle.user.email}`}
-                className="text-blue-600 hover:underline"
-              >
-                {vehicle.user.email}
-              </a>
-            </p>
           </div>
+
+          <VehicleContactForm
+            vehicleId={vehicle._id}
+            vehicleTitle={vehicleTitle}
+            ownerId={vehicle.user._id}
+          />
         </div>
       </div>
 

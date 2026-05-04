@@ -7,6 +7,7 @@ import {color} from "@/sanity/schemaTypes/color";
 import {fuel} from "@/sanity/schemaTypes/fuel";
 import {gearbox} from "@/sanity/schemaTypes/gearbox";
 import {model} from "@/sanity/schemaTypes/model";
+import {message} from "@/sanity/schemaTypes/message";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -16,6 +17,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     color,
     fuel,
     gearbox,
-    model
+    model,
+    message
   ],
 }

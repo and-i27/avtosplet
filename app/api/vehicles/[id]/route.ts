@@ -3,24 +3,48 @@
 import { client } from "@/sanity/lib/client";
 import { writeClient } from "@/sanity/lib/write-client";
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 
-/* =====================================================
-   GET – fetch vehicle for edit
-===================================================== */
+type ExistingImageRef = {
+  _key: string;
+  _ref: string;
+};
+
+async function canManageVehicle(vehicleId: string, userId: string, role?: string) {
+  if (role === "admin") {
+    return true;
+  }
+
+  const vehicle = await client.fetch<{ user?: { _ref?: string } }>(
+    `*[_type=="vehicle" && _id==$id][0]{ user }`,
+    { id: vehicleId }
+  );
+
+  return vehicle?.user?._ref === userId;
+}
+
 export async function GET(
   _: NextRequest,
-  context: { params: Promise<{ id: string }> } // params is a Promise
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await context.params; // 👈 unwrap Promise
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const params = await context.params;
     const { id } = params;
 
-    // Validate ID
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    // Fetch vehicle data from Sanity
+    const isAllowed = await canManageVehicle(id, session.user.id, session.user.role);
+    if (!isAllowed) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const vehicle = await client.fetch(
       `*[_type=="vehicle" && _id==$id][0]{
         brand->{_id, name},
@@ -41,37 +65,39 @@ export async function GET(
       { id }
     );
 
-    // If vehicle not found, return 404
     if (!vehicle) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     return NextResponse.json(vehicle);
   } catch (err) {
-    // Log and return error on failure
     console.error("GET vehicle error:", err);
     return NextResponse.json({ error: "Failed to fetch vehicle" }, { status: 500 });
   }
 }
 
-/* =====================================================
-   PUT – update vehicle
-===================================================== */
 export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Extract ID from params
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
     const params = await context.params;
     const { id } = params;
 
-    // Validate ID
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    // Parse form data
+    const isAllowed = await canManageVehicle(id, session.user.id, session.user.role);
+    if (!isAllowed) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const formData = await req.formData();
 
     const brand = formData.get("brand") as string;
@@ -89,21 +115,17 @@ export async function PUT(
     const seats = Number(formData.get("seats"));
     const description = formData.get("description") as string;
 
-    /* ---------- EXISTING IMAGES ---------- */
     const existingImagesRaw = formData.get("existingImages") as string;
-    const existingImages = existingImagesRaw ? JSON.parse(existingImagesRaw) : [];
+    const existingImages: ExistingImageRef[] = existingImagesRaw ? JSON.parse(existingImagesRaw) : [];
 
-    /* ---------- NEW IMAGES ---------- */
     const newFiles = formData.getAll("images") as File[];
     const newImageRefs = [];
 
-    // Upload new images and create references
     for (const file of newFiles) {
       const asset = await writeClient.assets.upload("image", file, {
         filename: file.name,
       });
 
-      // Create image reference
       newImageRefs.push({
         _type: "image",
         _key: crypto.randomUUID(),
@@ -111,9 +133,8 @@ export async function PUT(
       });
     }
 
-    /* ---------- FINAL IMAGES ARRAY ---------- */
     const images = [
-      ...existingImages.map((img: any) => ({
+      ...existingImages.map((img) => ({
         _type: "image",
         _key: img._key,
         asset: { _type: "reference", _ref: img._ref },
@@ -121,7 +142,6 @@ export async function PUT(
       ...newImageRefs,
     ];
 
-    // Update vehicle in Sanity
     await writeClient
       .patch(id)
       .set({
@@ -130,7 +150,6 @@ export async function PUT(
         fuel: { _type: "reference", _ref: fuel },
         gearbox: { _type: "reference", _ref: gearbox },
         color: color ? { _type: "reference", _ref: color } : undefined,
-
         price,
         year,
         kilometers,
@@ -145,35 +164,37 @@ export async function PUT(
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    // Log and return error on failure
     console.error("PUT vehicle error:", err);
     return NextResponse.json({ error: "Failed to update vehicle" }, { status: 500 });
   }
 }
 
-/* =====================================================
-   DELETE – delete vehicle
-===================================================== */
 export async function DELETE(
   _: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Extract ID from params
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
     const params = await context.params;
     const { id } = params;
 
-    // Validate ID
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    // Delete vehicle
+    const isAllowed = await canManageVehicle(id, session.user.id, session.user.role);
+    if (!isAllowed) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await writeClient.delete(id);
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    // Log and return error on failure
     console.error("DELETE vehicle error:", err);
     return NextResponse.json({ error: "Failed to delete vehicle" }, { status: 500 });
   }

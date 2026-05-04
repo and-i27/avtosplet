@@ -34,6 +34,24 @@ type VehicleFormState = {
   existingImages: ExistingImage[];
 };
 
+const vehicleFormFields: Array<
+  Exclude<keyof VehicleFormState, "images" | "existingImages">
+> = [
+  "brand",
+  "model",
+  "fuel",
+  "gearbox",
+  "color",
+  "price",
+  "year",
+  "kilometers",
+  "engineSize",
+  "powerKW",
+  "doors",
+  "seats",
+  "description",
+];
+
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
 
@@ -42,6 +60,7 @@ export default function EditVehiclePage() {
   const { id } = useParams();
 
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState<VehicleFormState>({
     brand: "", model: "", fuel: "", gearbox: "", color: "",
     price: "", year: "", kilometers: "", engineSize: "", powerKW: "",
@@ -156,24 +175,29 @@ export default function EditVehiclePage() {
   // Handle form submission
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const fd = new FormData();
+    setIsSubmitting(true);
 
-    // Append all form fields except images
-    ["brand","model","fuel","gearbox","color","price","year","kilometers","engineSize","powerKW","doors","seats","description"]
-      .forEach(f => fd.append(f, (form as any)[f]));
+    try {
+      const fd = new FormData();
 
-    // Append existing images info
-    fd.append("existingImages", JSON.stringify(form.existingImages.map(img => ({ _key: img._key, _ref: img._ref }))));
+      // Append all form fields except images
+      vehicleFormFields.forEach((field) => fd.append(field, form[field]));
 
-    // Append new images
-    form.images.forEach(img => fd.append("images", img));
+      // Append existing images info
+      fd.append("existingImages", JSON.stringify(form.existingImages.map(img => ({ _key: img._key, _ref: img._ref }))));
 
-    // Send PUT request to update vehicle
-    const res = await fetch(`/api/vehicles/${id}`, { method: "PUT", body: fd });
+      // Append new images
+      form.images.forEach(img => fd.append("images", img));
 
-    // Check response and navigate accordingly
-    if (res.ok) router.push("/profile");
-    else alert("Error updating vehicle");
+      // Send PUT request to update vehicle
+      const res = await fetch(`/api/vehicles/${id}`, { method: "PUT", body: fd });
+
+      // Check response and navigate accordingly
+      if (res.ok) router.push("/profile");
+      else alert("Error updating vehicle");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   // Show loading state if data is still being fetched
@@ -321,8 +345,12 @@ export default function EditVehiclePage() {
             </button>
 
             {/* SUBMIT */}
-            <button type="submit" className="w-1/2 rounded-lg bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 transition">
-              Save changes
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-1/2 rounded-lg bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 transition disabled:cursor-not-allowed disabled:bg-blue-400"
+            >
+              {isSubmitting ? "Saving..." : "Save"}
             </button>
           </div>
         </form>
