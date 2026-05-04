@@ -6,6 +6,7 @@ declare module "next-auth" {
     name: string | null;
     email: string | null;
     providers?: string[];
+    role?: "user" | "admin";
     emailVerified?: Date | null;
   }
 
@@ -15,6 +16,7 @@ declare module "next-auth" {
       name: string | null;
       email: string | null;
       providers?: string[];
+      role?: "user" | "admin";
       emailVerified?: Date | null;
     } & DefaultSession["user"];
   }
@@ -27,6 +29,7 @@ declare module "next-auth/jwt" {
       name: string | null;
       email: string | null;
       providers?: string[];
+      role?: "user" | "admin";
       emailVerified?: Date | null;
     };
   }

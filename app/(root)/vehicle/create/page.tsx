@@ -37,6 +37,7 @@ const inputClass =
 export default function AddVehiclePage() {
   const router = useRouter();
   const { data: session } = useSession();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState<VehicleFormState>({
     brand: "",
@@ -118,22 +119,35 @@ export default function AddVehiclePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!session?.user?.id) return alert("You must be logged in");
+    setIsSubmitting(true);
 
-    const fd = new FormData();
+    try {
+      const fd = new FormData();
 
-    // Append all form fields except images
-    Object.entries(form).forEach(([key, value]) => {
-      if (key === "images") return;
-      fd.append(key, value as string);
-    });
-    fd.append("userId", session.user.id);
-    form.images.forEach(img => fd.append("images", img));
+      // Append all form fields except images
+      Object.entries(form).forEach(([key, value]) => {
+        if (key === "images") return;
+        fd.append(key, value as string);
+      });
+      fd.append("userId", session.user.id);
+      form.images.forEach(img => fd.append("images", img));
 
-    // Send POST request to create vehicle
-    const res = await fetch("/api/vehicles", { method: "POST", body: fd });
-    if (!res.ok) return alert("Error adding vehicle");
+      // Send POST request to create vehicle
+      const res = await fetch("/api/vehicles", { method: "POST", body: fd });
+      if (!res.ok) {
+        alert("Error adding vehicle");
+        return;
+      }
 
-    router.push("/");
+      const createdVehicle = await res.json();
+      router.push(`/vehicle/${createdVehicle._id}`);
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert("Error adding vehicle");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   // Remove image from form state
@@ -288,9 +302,10 @@ export default function AddVehiclePage() {
           {/* SUBMIT */}
           <button
             type="submit"
-            className="w-full rounded-lg bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 transition"
+            disabled={isSubmitting}
+            className="w-full rounded-lg bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 transition disabled:cursor-not-allowed disabled:bg-blue-400"
           >
-            Add Vehicle
+            {isSubmitting ? "Creating..." : "Create"}
           </button>
         </form>
       </div>

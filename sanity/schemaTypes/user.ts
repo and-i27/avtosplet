@@ -40,6 +40,18 @@
         },
       },
       {
+        name: "role",
+        type: "string",
+        title: "Role",
+        initialValue: "user",
+        options: {
+          list: [
+            { title: "User", value: "user" },
+            { title: "Admin", value: "admin" },
+          ],
+        },
+      },
+      {
         name: "emailVerified",
         type: "datetime",
         title: "Email Verified",

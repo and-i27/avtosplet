@@ -5,6 +5,9 @@ import { client } from "@/sanity/lib/client";
 import bcrypt from "bcryptjs";
 import { writeClient } from "@/sanity/lib/write-client";
 
+function uniqueProviders(providers?: string[]) {
+  return Array.from(new Set((providers ?? []).filter(Boolean)));
+}
 
 export const authConfig: NextAuthConfig = {
   trustHost: true,
@@ -28,7 +31,6 @@ export const authConfig: NextAuthConfig = {
 
         if (!user) return null;
 
-        // If user exists but has no password → GitHub-only account
         if (!user.password) {
           return null;
         }
@@ -40,7 +42,8 @@ export const authConfig: NextAuthConfig = {
           id: user._id,
           name: user.name,
           email: user.email,
-          providers: user.providers ?? ["credentials"],
+          providers: uniqueProviders(user.providers ?? ["credentials"]),
+          role: user.role ?? "user",
           emailVerified: user.emailVerified ?? null,
         };
       },
@@ -64,72 +67,83 @@ export const authConfig: NextAuthConfig = {
 
   callbacks: {
     async signIn({ user, account }) {
-    // Samo za GitHub
-    if (account?.provider === "github") {
-      if (!user.email) return false;
+      if (account?.provider === "github") {
+        if (!user.email) return false;
 
-      // Ali user že obstaja po emailu?
-      const existingUser = await client.fetch(
-        `*[_type=="user" && email==$email][0]`,
-        { email: user.email }
-      );
+        const existingUser = await client.fetch<{
+          _id: string;
+          role?: "user" | "admin";
+          providers?: string[];
+        } | null>(
+          `*[_type=="user" && email==$email][0]{
+            _id,
+            role,
+            providers
+          }`,
+          { email: user.email }
+        );
 
-      if (existingUser) {
-        // 👉 LINK GITHUB NA OBSTOJEČ PROFIL
-        await writeClient
-          .patch(existingUser._id)
-          .setIfMissing({
-            providers: [],
-          })
-          .append("providers", ["github"])
-          .set({
+        if (existingUser) {
+          const nextProviders = uniqueProviders([
+            ...(existingUser.providers ?? []),
+            "github",
+          ]);
+
+          await writeClient
+            .patch(existingUser._id)
+            .set({
+              githubId: account.providerAccountId,
+              providers: nextProviders,
+              role: existingUser.role ?? "user",
+              emailVerified: new Date().toISOString(),
+            })
+            .commit();
+        } else {
+          await writeClient.create({
+            _type: "user",
+            name: user.name,
+            email: user.email,
             githubId: account.providerAccountId,
+            providers: ["github"],
+            role: "user",
             emailVerified: new Date().toISOString(),
-          })
-          .commit();
-      } else {
-        // 👉 USTVARI NOV USER (GitHub-only)
-        await writeClient.create({
-          _type: "user",
-          name: user.name,
-          email: user.email,
-          githubId: account.providerAccountId,
-          providers: ["github"],
-          emailVerified: new Date().toISOString(),
-        });
+          });
+        }
       }
-    }
 
-    return true;
-  },
+      return true;
+    },
+
     async jwt({ token, user }) {
-  if (user?.email) {
-    const dbUser = await client.fetch(
-      `*[_type=="user" && email==$email][0]{
-        _id,
-        name,
-        email,
-        providers,
-        emailVerified
-      }`,
-      { email: user.email }
-    );
+      const email = user?.email ?? token.user?.email ?? token.email;
 
-    if (dbUser) {
-      token.user = {
-        id: dbUser._id,
-        name: dbUser.name,
-        email: dbUser.email,
-        providers: dbUser.providers ?? [],
-        emailVerified: dbUser.emailVerified ?? null,
-      };
-    }
-  }
+      if (email) {
+        const dbUser = await client.fetch(
+          `*[_type=="user" && email==$email][0]{
+            _id,
+            name,
+            email,
+            providers,
+            role,
+            emailVerified
+          }`,
+          { email }
+        );
 
-  return token;
-}
+        if (dbUser) {
+          token.user = {
+            id: dbUser._id,
+            name: dbUser.name,
+            email: dbUser.email,
+            providers: uniqueProviders(dbUser.providers),
+            role: dbUser.role ?? "user",
+            emailVerified: dbUser.emailVerified ?? null,
+          };
+        }
+      }
 
-,
+      return token;
+    },
 
     async session({ session, token }) {
       if (token.user) {
@@ -138,6 +152,7 @@ export const authConfig: NextAuthConfig = {
           name: string;
           email: string;
           providers: string[];
+          role: "user" | "admin";
           emailVerified: Date | null;
         };
       }

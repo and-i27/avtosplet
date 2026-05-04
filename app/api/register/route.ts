@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
       email,
       password: hashedPassword,
       providers: ["credentials"], // mark as credentials account
+      role: "user",
       emailVerified: null,
     });
 
